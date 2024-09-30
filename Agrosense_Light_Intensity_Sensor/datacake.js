@@ -3,12 +3,11 @@ function Decoder(payload, port) {
         bytes: payload
     };
 
-    var num = input.bytes[0] * 256 + input.bytes[1];
+    // var num = input.bytes[0] * 256 + input.bytes[1];
     var bat = input.bytes[2] / 10.0;
     var light = (input.bytes[3] * 16777216 + input.bytes[4] * 65536 + input.bytes[5] * 256 + input.bytes[6]) / 100.0;
 
     var decoded = {
-        num: num,
         bat: bat,
         light: light,
     };
@@ -27,7 +26,6 @@ function Decoder(payload, port) {
     }
 
     return [
-        { field: "num", value: decoded.num },
         { field: "bat", value: decoded.bat },
         { field: "light", value: decoded.light },
         { field: "lora_rssi", value: decoded.lora_rssi },

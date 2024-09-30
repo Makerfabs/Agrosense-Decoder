@@ -3,7 +3,7 @@ function Decoder(payload, port) {
         bytes: payload
     };
 
-    var num = input.bytes[0] * 256 + input.bytes[1];
+    // var num = input.bytes[0] * 256 + input.bytes[1];
     var bat = input.bytes[2] / 10.0;
     var humidity = ( input.bytes[3] * 256 + input.bytes[4] ) / 10.0;
     var temperature = input.bytes[5] * 256 + input.bytes[6];
@@ -14,7 +14,6 @@ function Decoder(payload, port) {
 
 
     var decoded = {
-        num: num,
         bat: bat,
         humidity: humidity,
         temperature: temperature,
@@ -34,7 +33,6 @@ function Decoder(payload, port) {
     }
 
     return [
-        { field: "num", value: decoded.num },
         { field: "bat", value: decoded.bat },
         { field: "humidity", value: decoded.humidity },
         { field: "temperature", value: decoded.temperature },
