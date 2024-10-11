@@ -10,7 +10,7 @@ function Decoder(payload, port) {
     if (temp >= 0x8000) {
         temp -= 0x10000;
     }
-    temp = temp / 10.0;
+    temp = temp / 100.0;
     
     var decoded = {
         bat: bat,
