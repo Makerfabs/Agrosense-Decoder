@@ -5,18 +5,16 @@ function Decoder(payload, port) {
 
     // var num = input.bytes[0] * 256 + input.bytes[1];
     var bat = input.bytes[2] / 10.0;
-    var humidity = ( input.bytes[3] * 256 + input.bytes[4] ) / 10.0;
-    var temperature = input.bytes[5] * 256 + input.bytes[6];
-    if (temperature >= 0x8000) {
-        temperature -= 0x10000;
-    }
-    temperature = temperature / 10.0
+    var water_leak_flag = input.bytes[3];
+    var water_leak_cnt = input.bytes[4] * 256 + input.bytes[5];
+    var water_leak_time =  input.bytes[6] * 16777216 + input.bytes[7] * 65536 + input.bytes[8] * 256 + input.bytes[9];
 
 
     var decoded = {
         bat: bat,
-        humidity: humidity,
-        temperature: temperature,
+        water_leak_flag: water_leak_flag,
+        water_leak_cnt: water_leak_cnt,
+        water_leak_time: water_leak_time,
     };
 
     // Test for LoRa properties in normalizedPayload
@@ -34,8 +32,9 @@ function Decoder(payload, port) {
 
     return [
         { field: "bat", value: decoded.bat },
-        { field: "humidity", value: decoded.humidity },
-        { field: "temperature", value: decoded.temperature },
+        { field: "water_leak_flag", value: decoded.water_leak_flag },
+        { field: "water_leak_cnt", value: decoded.water_leak_cnt },
+        { field: "water_leak_time", value: decoded.water_leak_time },
         { field: "lora_rssi", value: decoded.lora_rssi },
         { field: "lora_snr", value: decoded.lora_snr },
         { field: "lora_datarate", value: decoded.lora_datarate }
