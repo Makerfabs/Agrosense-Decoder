@@ -12,7 +12,7 @@ function Decoder(payload, port) {
 
     var decoded = {
         bat: bat,
-        water_leak_flag: water_leak_flag,
+        water_leak_flag: water_leak_flag, //Normal is 0,leakage is 1.
         water_leak_cnt: water_leak_cnt,
         water_leak_time: water_leak_time,
     };
