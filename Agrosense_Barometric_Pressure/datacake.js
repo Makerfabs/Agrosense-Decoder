@@ -10,7 +10,7 @@ function Decoder(payload, port) {
 
     var decoded = {
         bat: bat,
-        humidity: humidity,
+        press: press,
         temperature: temperature,
     };
 
