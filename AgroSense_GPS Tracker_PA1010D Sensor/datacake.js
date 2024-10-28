@@ -14,7 +14,7 @@ function Decoder(payload, port) {
     var gsensor_onoff = input.bytes[22];
     var gsensor_sensitivity = input.bytes[23];
 
-    var year, month, date, hour, minute, second, latitude, nsHemi, longitude, ewHemi;
+    var year, month, date, hour, minute, second, latitude, nsHemi, longitude, ewHemi, device_location;
 
     if (gpsStatus != 0) {
         year = input.bytes[5] * 256 + input.bytes[6];
@@ -57,6 +57,7 @@ function Decoder(payload, port) {
         gSensorState: gSensorState,
         latitude: latitude,
         longitude: longitude,
+        device_location: "(" + latitude + "," + longitude + ")"
         gsensor_onoff: gsensor_onoff,
         gsensor_sensitivity: gsensor_sensitivity
     };
@@ -79,6 +80,7 @@ function Decoder(payload, port) {
         { field: "gSensorState", value: decoded.gSensorState },
         { field: "latitude", value: decoded.latitude },
         { field: "longitude", value: decoded.longitude },
+        { field: "device_location", value: decoded.device_location },
         { field: "gsensor_onoff", value: decoded.gsensor_onoff },
         { field: "gsensor_sensitivity", value: decoded.gsensor_sensitivity },
         { field: "lora_rssi", value: decoded.lora_rssi },
@@ -86,6 +88,7 @@ function Decoder(payload, port) {
         { field: "lora_datarate", value: decoded.lora_datarate }
     ];
 }
+
 
 // .................................................................................................
 // .................................................................................................
