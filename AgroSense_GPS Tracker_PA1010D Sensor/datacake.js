@@ -1,3 +1,7 @@
+// This file contains the uplink and downlink for datacake
+
+// Uplink
+
 function Decoder(payload, port) {
     var input = {
         bytes: payload
@@ -82,3 +86,70 @@ function Decoder(payload, port) {
         { field: "lora_datarate", value: decoded.lora_datarate }
     ];
 }
+
+// .................................................................................................
+// .................................................................................................
+// .................................................................................................
+
+// Downlink
+
+// Encoder function for port 1
+function EncoderPort1(measurements) {
+    if (port === 1) {
+        var payload = [];
+        var minutes = measurements["minutes"] ? measurements["minutes"].value : 0;
+        var seconds = minutes * 60;
+
+        // If the number of seconds is less than 300, set it to 300 seconds
+        if (seconds < 300) {
+            seconds = 300;
+            console.log("Interval < 300 Seconds / 5 Minutes not allowed!");
+        }
+
+        // Create payload byte array
+        payload = [
+            (seconds >> 24) & 0xFF,
+            (seconds >> 16) & 0xFF,
+            (seconds >> 8) & 0xFF,
+            seconds & 0xFF
+        ];
+
+        return payload;
+    }
+    return [];
+}
+
+// Encoder function for port 3
+function EncoderPort3(measurements) {
+    if (port === 3) {
+        var payload = [];
+        var gsensorSensitivity = measurements["gsensor_sensitivity"] ? measurements["gsensor_sensitivity"].value : 0;
+
+        // Encode gsensor sensitivity as a 1-byte value
+        payload = [
+            gsensorSensitivity & 0xFF
+        ];
+
+        return payload;
+    }
+    return [];
+}
+
+// Encoder function for port 4
+function EncoderPort4(measurements) {
+    if (port === 4) {
+        var payload = [];
+        var gsensorOnOff = measurements["gsensor_onoff"] ? measurements["gsensor_onoff"].value : 0;
+
+        // Encode gsensor on/off as a 1-byte value
+        payload = [
+            gsensorOnOff & 0xFF
+        ];
+
+        return payload;
+    }
+    return [];
+}
+
+
+
