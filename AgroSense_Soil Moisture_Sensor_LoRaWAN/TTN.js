@@ -10,7 +10,7 @@ function decodeUplink(input) {
 
     // Variables calculated from device payload
     // var num = input.bytes[0] * 256 + input.bytes[1]
-    var Battery = (input.bytes[4] / 10.0).toFixed(decimalPlaces) + "V";
+    var Battery = (input.bytes[4] / 10.0).toFixed(decimalPlaces);
     var ADC = input.bytes[2] * 256 + input.bytes[3];
     
     // Prepare the data object
@@ -22,7 +22,7 @@ function decodeUplink(input) {
     // Only calculate and add Moisture if adcMax and adcMin are defined
     if (adcMax !== undefined && adcMin !== undefined) {
         var Moisture = ((Math.max(0, Math.min(100, ((adcMax - ADC) / (adcMax - adcMin)) * 100)))
-                        .toFixed(decimalPlaces) + "%");
+                        .toFixed(decimalPlaces));
         data.Moisture = Moisture;
     }
 
