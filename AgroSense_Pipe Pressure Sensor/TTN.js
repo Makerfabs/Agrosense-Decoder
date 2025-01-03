@@ -2,37 +2,21 @@
 
 // Uplink
 function decodeUplink(input) {
-
-    // var num = input.bytes[0] * 256 + input.bytes[1]
+    var num = input.bytes[0] * 256 + input.bytes[1]
     var bat = input.bytes[2] / 10.0
-    var Significant = input.bytes[3]
-    var humi = (input.bytes[4] * 256 + input.bytes[5]) / 10.0
+    var Volt_Pressure = (input.bytes[3] * 256 + input.bytes[4]) / 1000.0
+    var Pipe_Pressure = (Volt_Pressure-0.483)*250  //KPa
+        Pipe_Pressure = Math.round(Pipe_Pressure * 1000) / 1000;  // keep three decimal places
+    var time_interval = (input.bytes[13] * 16777216 + input.bytes[14] * 65536 + input.bytes[15] * 256 + input.bytes[16]) / 1000.0//S
 
-    var temp = input.bytes[6] * 256 + input.bytes[7]
-    if (temp >= 0x8000) {
-        temp -= 0x10000;
-    }
-    temp = temp / 10.0
-    var interval = (input.bytes[8] * 16777216 + input.bytes[9] * 65536 + input.bytes[10] * 256 + input.bytes[11]) / 1000
-
-    
-        if (Significant) {
-          return {
-            data: {
+    return {
+        data: {
             field1: bat,
-            field2: humi,
-            field3: temp,
-            field4: interval,
-            },
-          };
-        }
-        else {
-          return {
-            data: {
-            Significant: "data invalid",
-            },
-          };
-        }
+            field2: Volt_Pressure,
+            field3: Pipe_Pressure,
+            field4: time_interval,
+        },
+    };
 }
 
 // .................................................................................................
