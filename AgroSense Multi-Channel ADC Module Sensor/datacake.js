@@ -73,7 +73,7 @@ Fport6 sets the truth table：
 |           0	          0	      1	      0	      0   |  0x04 =enable the ADC3 channel
 |           0	          1	      0	      0	      0   |  0x08 =enable the ADC4 channel
 |           1	          0	      0	      0	      0   |  0x10 =enable the Differentialbits  channel，At this point, FPort7 must be set to 1
-|           0	          0       0       0	      0   |  0x00 =Turn off all channels
+|           0	          0	      0	      0	      0   |  0x00 =Turn off all channels
 |           1	          1	      1	      1	      1   |  0x1F =enable all channels
 ------------------------------------------------------
 */
