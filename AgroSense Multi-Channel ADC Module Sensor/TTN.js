@@ -36,6 +36,18 @@ the first is the modification interval for Fport1;
 the second is the amount of uploaded local latest log data for Fport5;
 the third is to turn on or off the corresponding ADC channel for Fport6 (the default is all on); 
 the fourth is to set the third and fourth channels as differential inputs for Fport7;
+
+Fport6 sets the truth table：
+------------------------------------------------------
+|    Differentialbits	ADC4	ADC3	ADC2	ADC1  |  
+|           0	          0	      0	      0	      1   |  0x01 =enable the ADC1 channel
+|           0	          0	      0       1       0   |  0x02 =enable the ADC2 channel
+|           0	          0	      1	      0	      0   |  0x04 =enable the ADC3 channel
+|           0	          1	      0	      0	      0   |  0x08 =enable the ADC4 channel
+|           1	          0	      0	      0	      0   |  0x10 =enable the Differentialbits  channel，At this point, FPort7 must be set to 1
+|           0	          0       0	      0	      0   |  0x00 =Turn off all channels
+|           1	          1	      1	      1	      1   |  0x1F =enable all channels
+------------------------------------------------------
 */
 
 // Encoder function to be used in the TTN console for downlink payload(Fport1)
