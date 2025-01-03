@@ -56,9 +56,17 @@ function Decoder(payload, port) {
 // .................................................................................................
 // .................................................................................................
 
-// Downlink
+/* 
+Downlink:
 
-// Encoder function for port 1
+The downlink has four functions: 
+the first is the modification interval for Fport1; 
+the second is the amount of uploaded local latest log data for Fport5;
+the third is to turn on or off the corresponding ADC channel for Fport6 (the default is all on); 
+the fourth is to set the third and fourth channels as differential inputs for Fport7;
+*/
+
+// Encoder function for Fport 1
 function Encoder(measurements, port) {
     var interval = measurements["SENDING_TIME_INTERVAL"].value * 60;
     if (interval < 300) {

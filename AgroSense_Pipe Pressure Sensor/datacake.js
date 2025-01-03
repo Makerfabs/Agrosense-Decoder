@@ -46,9 +46,15 @@ function Decoder(payload, port) {
 // .................................................................................................
 // .................................................................................................
 
-// Downlink
+/*
+Downlink
 
-// Encoder function for port 1
+The downlink has two functions: 
+the first is the modification interval for Fport1,
+the second is the amount of uploaded local latest log data for Fport5;
+*/
+
+// Encoder function for Fport 1
 function Encoder(measurements, port) {
     var interval = measurements["SENDING_TIME_INTERVAL"].value * 60;
     if (interval < 300) {

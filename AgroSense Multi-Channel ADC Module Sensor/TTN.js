@@ -28,9 +28,17 @@ function decodeUplink(input) {
 // .................................................................................................
 // .................................................................................................
 
-// Downlink
+/* 
+Downlink:
 
-// Encoder function to be used in the TTN console for downlink payload
+The downlink has four functions: 
+the first is the modification interval for Fport1; 
+the second is the amount of uploaded local latest log data for Fport5;
+the third is to turn on or off the corresponding ADC channel for Fport6 (the default is all on); 
+the fourth is to set the third and fourth channels as differential inputs for Fport7;
+*/
+
+// Encoder function to be used in the TTN console for downlink payload(Fport1)
 function Encoder(input) {
     var minutes = input.minutes;
 
