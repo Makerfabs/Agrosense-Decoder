@@ -5,7 +5,7 @@ function decodeUplink(input) {
     var num = input.bytes[0] * 256 + input.bytes[1]
     var bat = input.bytes[2] / 10.0
     var Volt_Pressure = (input.bytes[3] * 256 + input.bytes[4]) / 1000.0
-    var Pipe_Pressure = (Volt_Pressure-0.483)*250  //KPa
+    var Pipe_Pressure = (Volt_Pressure-0.483)*250  //KPa---(If the pressure sensor is replaced, the user has to modify the conversion formula.)
         Pipe_Pressure = Math.round(Pipe_Pressure * 1000) / 1000;  // keep three decimal places
     var time_interval = (input.bytes[13] * 16777216 + input.bytes[14] * 65536 + input.bytes[15] * 256 + input.bytes[16]) / 1000.0//S
 
