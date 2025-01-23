@@ -17,7 +17,7 @@ function Decoder(payload, port) {
         temp -= 0x10000;
     }
     temp = temp / 10.0
-   var ce = (input.bytes[8] * 256 + input.bytes[9]) / 10.0
+   var ec = (input.bytes[8] * 256 + input.bytes[9]) / 10.0
     var ph = (input.bytes[10] * 256 + input.bytes[11]) / 10.0
     var interval = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 1000
 
@@ -26,7 +26,7 @@ function Decoder(payload, port) {
         Significant: Significant,
         humi: humi,
         temp: temp,
-        ce: ce,
+        ec: ec,
 	ph: ph,
         interval: interval,
     };
@@ -49,7 +49,7 @@ function Decoder(payload, port) {
             { field: "bat", value: decoded.bat },
             { field: "humi", value: decoded.humi },
             { field: "temp", value: decoded.temp },
-	    { field: "ce", value: decoded.ce },
+	    { field: "ec", value: decoded.ec },
 	    { field: "ph", value: decoded.ph },
             { field: "interval", value: decoded.interval },
             { field: "lora_rssi", value: decoded.lora_rssi },

@@ -14,7 +14,7 @@ function decodeUplink(input) {
   }
   temp = temp / 10.0
 
-var ce = (input.bytes[8] * 256 + input.bytes[9]) / 10.0
+var ec = (input.bytes[8] * 256 + input.bytes[9]) / 10.0
 var ph = (input.bytes[10] * 256 + input.bytes[11]) / 10.0
   var interval = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 1000
 
@@ -25,7 +25,7 @@ var ph = (input.bytes[10] * 256 + input.bytes[11]) / 10.0
           field1: bat,
           field2: humi,
           field3: temp,
-          field4: ce,
+          field4: ec,
           field5: ph,
           field6: interval,
           },
