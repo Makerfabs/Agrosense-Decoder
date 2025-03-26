@@ -29,14 +29,14 @@ function decodeUplink(input) {
 
   return {
     data: {
-      Relay_1: Relay_1,//RELAY1   :0-OFF; 1-ON
-      Relay_2: Relay_2,//RELAY2   :0-OFF; 1-ON
-      Relay_3: Relay_3,//RELAY3   :0-OFF; 1-ON
-      Relay_4: Relay_4,//RELAY4   :0-OFF; 1-ON
-      INA_1: INA_1,//0-5V ADC
-      INA_2: INA_2,//0-5V ADC
-      temperature: temperature,
-      humidity: humidity,
+      field1: Relay_1,//RELAY1   :0-OFF; 1-ON
+      field2: Relay_2,//RELAY2   :0-OFF; 1-ON
+      field3: Relay_3,//RELAY3   :0-OFF; 1-ON
+      field4: Relay_4,//RELAY4   :0-OFF; 1-ON
+      field5: INA_1,//0-5V ADC
+      field6: INA_2,//0-5V ADC
+      field7: temperature,
+      field8: humidity,
       interval: interval
     },
     warnings: [],
