@@ -34,7 +34,7 @@ function Decoder(payload, port) {
 
     return [
         { field: "bat", value: decoded.bat },
-        { field: " Pipe_Pressure", value: decoded. Pipe_Pressure },
+        { field: "Pipe_Pressure", value: decoded. Pipe_Pressure },
         { field: "lora_rssi", value: decoded.lora_rssi },
         { field: "lora_snr", value: decoded.lora_snr },
         { field: "lora_datarate", value: decoded.lora_datarate }
