@@ -1,3 +1,4 @@
+
 // This file contains the uplink and downlink for datacake
 
 // Uplink
@@ -22,8 +23,6 @@ function Decoder(payload, port) {
     
     var INA_1 = ( input.bytes[10] * 256 + input.bytes[11] ) / 10.0
     var INA_2 = ( input.bytes[12] *256 + input.bytes[13] ) / 10.0
-    var INA_3 = ( input.bytes[14] *256 + input.bytes[15] ) / 10.0
-    var INA_4 = ( input.bytes[16] *256 + input.bytes[17] ) / 10.0
     
     var interval = (input.bytes[18]* 16777216 + input.bytes[19]* 65536 + input.bytes[20] * 256 + input.bytes[21]) / 1000
 
@@ -35,53 +34,49 @@ function Decoder(payload, port) {
         Relay_4:Relay_4,
         INA_1:INA_1,
         INA_2:INA_2,
-        INA_3:INA_3,
-	    INA_4:INA_4,
 	    temperature:temperature,
 	    humidity:humidity,
 	    interval:interval,
     };
 
     // Test for LoRa properties in normalizedPayload
-    try {
-    // RSSI 和 SNR 解析
-    if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
-        decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
-        decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
-    } else {
-        decoded.lora_rssi = 0;
-        decoded.lora_snr = 0;
-    }
-
-    // 数据速率解析
-    decoded.lora_datarate = normalizedPayload.spreading_factor 
-                        || normalizedPayload.data_rate 
-                        || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
-                        || "unknown";
-    
-    } catch (error) {
-    console.log('LoRa property parsing error:', error);
+ try {
+  // RSSI 和 SNR 解析
+  if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
+    decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
+    decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
+  } else {
     decoded.lora_rssi = 0;
     decoded.lora_snr = 0;
-    decoded.lora_datarate = "unknown";
-    }
+  }
 
-    return [
-    { field: "Relay_1", value: decoded.Relay_1 },
-    { field: "Relay_2", value: decoded.Relay_2 },
-    { field: "Relay_3", value: decoded.Relay_3 },
-    { field: "Relay_4", value: decoded.Relay_4 },
-    { field: "INA_1", value: decoded.INA_1 },
-    { field: "INA_2", value: decoded.INA_2 },
-    { field: "INA_3", value: decoded.INA_3 },
-    { field: "INA_4", value: decoded.INA_4 },
-    { field: "humidity", value: decoded.humidity },
-    { field: "temperature", value: decoded.temperature },
-    { field: "interval", value: decoded.interval },
-    { field: "lora_rssi", value: decoded.lora_rssi },
-    { field: "lora_snr", value: decoded.lora_snr },
-    { field: "lora_datarate", value: decoded.lora_datarate },
-    ];
+  // 数据速率解析
+  decoded.lora_datarate = normalizedPayload.spreading_factor 
+                       || normalizedPayload.data_rate 
+                       || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
+                       || "unknown";
+  
+} catch (error) {
+  console.log('LoRa property parsing error:', error);
+  decoded.lora_rssi = 0;
+  decoded.lora_snr = 0;
+  decoded.lora_datarate = "unknown";
+}
+
+return [
+  { field: "Relay_1", value: decoded.Relay_1 },
+  { field: "Relay_2", value: decoded.Relay_2 },
+  { field: "Relay_3", value: decoded.Relay_3 },
+  { field: "Relay_4", value: decoded.Relay_4 },
+  { field: "INA_1", value: decoded.INA_1 },
+  { field: "INA_2", value: decoded.INA_2 },
+  { field: "humidity", value: decoded.humidity },
+  { field: "temperature", value: decoded.temperature },
+  { field: "interval", value: decoded.interval },
+  { field: "lora_rssi", value: decoded.lora_rssi },
+  { field: "lora_snr", value: decoded.lora_snr },
+  { field: "lora_datarate", value: decoded.lora_datarate },
+];
 }
 
 
