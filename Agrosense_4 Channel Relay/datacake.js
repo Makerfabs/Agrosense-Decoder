@@ -41,7 +41,7 @@ function Decoder(payload, port) {
 
     // Test for LoRa properties in normalizedPayload
  try {
-  // RSSI 和 SNR 解析
+
   if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
     decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
     decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
@@ -50,7 +50,7 @@ function Decoder(payload, port) {
     decoded.lora_snr = 0;
   }
 
-  // 数据速率解析
+
   decoded.lora_datarate = normalizedPayload.spreading_factor 
                        || normalizedPayload.data_rate 
                        || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
@@ -100,7 +100,6 @@ function Encoder(measurements, port) {
       
       var relayStatus = measurements["RELAY1_ON_OFF"] ? measurements["RELAY1_ON_OFF"].value : 0;
       
-      // 确保relayStatus只能为0或1
       relayStatus = relayStatus === true ? 1 : 0;
       
       payload.push(relayStatus);
@@ -115,7 +114,6 @@ function Encoder(measurements, port) {
       
       var relayStatus = measurements["RELAY2_ON_OFF"] ? measurements["RELAY2_ON_OFF"].value : 0;
       
-      // 确保relayStatus只能为0或1
       relayStatus = relayStatus === true ? 1 : 0;
       
       payload.push(relayStatus);
@@ -130,7 +128,6 @@ function Encoder(measurements, port) {
       
       var relayStatus = measurements["RELAY3_ON_OFF"] ? measurements["RELAY3_ON_OFF"].value : 0;
       
-      // 确保relayStatus只能为0或1
       relayStatus = relayStatus === true ? 1 : 0;
       
       payload.push(relayStatus);
@@ -145,7 +142,6 @@ function Encoder(measurements, port) {
       
       var relayStatus = measurements["RELAY4_ON_OFF"] ? measurements["RELAY4_ON_OFF"].value : 0;
       
-      // 确保relayStatus只能为0或1
       relayStatus = relayStatus === true ? 1 : 0;
       
       payload.push(relayStatus);

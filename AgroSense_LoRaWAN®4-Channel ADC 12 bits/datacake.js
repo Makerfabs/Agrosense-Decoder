@@ -79,35 +79,53 @@ Fport6 sets the truth table：
 */
 
 // Encoder function for Fport 1
-function Encoder(measurements, port) {
-    var interval = measurements["SENDING_TIME_INTERVAL"].value * 60;
-    if (interval < 300) {
-        interval = 300;
-        console.log("Interval < 300 Seconds / 5 Minutes not allowed!");
-    }
-    // Convert to hexadecimal only from interval
-    return interval.toString(16).padStart(4, '0').match(/.{2}/g).map(function(f) {return parseInt(f, 16)});
+/**
+ * String.prototype.repeat() polyfill
+ */
+if (!String.prototype.repeat) {
+    String.prototype.repeat = function(count) {
+        if (this == null) throw new TypeError("can't convert " + this + " to object");
+        var str = '' + this;
+        count = +count;
+        if (count < 0 || count === Infinity) throw new RangeError("repeat count must be non-negative and finite");
+        if (count === 0) return '';
+        var result = '';
+        while (count-- > 0) {
+            result += str;
+        }
+        return result;
+    };
 }
+
 /**
  * String.prototype.padStart() polyfill
- * https://github.com/uxitten/polyfill/blob/master/string.polyfill.js
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
  */
 if (!String.prototype.padStart) {
-	String.prototype.padStart = function padStart(targetLength,padString) {
-		targetLength = targetLength>>0; //truncate if number or convert non-number to 0;
-		padString = String((typeof padString !== 'undefined' ? padString : ' '));
-		if (this.length > targetLength) {
-			return String(this);
-		}
-		else {
-			targetLength = targetLength-this.length;
-			if (targetLength > padString.length) {
-				padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
-			}
-			return padString.slice(0,targetLength) + String(this);
-		}
-	};
+    String.prototype.padStart = function padStart(targetLength, padString) {
+        targetLength = targetLength >> 0;
+        padString = String(padString || ' ');
+        if (this.length >= targetLength) {
+            return String(this);
+        } else {
+            targetLength = targetLength - this.length;
+            if (targetLength > padString.length) {
+                padString += padString.repeat(targetLength / padString.length);
+            }
+            return padString.slice(0, targetLength) + String(this);
+        }
+    };
+}
+
+function Encoder(measurements, port) {
+    var interval = measurements["SENDING_TIME_INTERVAL"].value * 60;
+
+    return interval
+        .toString(16)
+        .padStart(8, '0')
+        .match(/.{2}/g)
+        .map(function(f) {
+            return parseInt(f, 16);
+        });
 }
 
 
