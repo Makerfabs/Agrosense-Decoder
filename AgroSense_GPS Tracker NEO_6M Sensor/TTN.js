@@ -7,37 +7,22 @@ function decodeUplink(input) {
     var batteryLevel = input.bytes[2] / 10.0;
     var gSensorState = input.bytes[3];
     var gpsStatus = input.bytes[4];
-    var gsensor_onoff = input.bytes[22];
-    var gsensor_sensitivity = input.bytes[23];
+    var gsensor_onoff = input.bytes[15];
+    var gsensor_sensitivity = input.bytes[16];
     
     if (gpsStatus != 0) {
-        var year = input.bytes[5] * 256 + input.bytes[6];
-        var month = input.bytes[7];
-        var date = input.bytes[8];
-        var hour = input.bytes[9];
-        var minute = input.bytes[10];
-        var second = input.bytes[11];
+        var latitude = (input.bytes[5] * 16777216 + input.bytes[6] * 65536 + input.bytes[7] * 256 + input.bytes[8]) / 100000;
+        var nsHemi = input.bytes[9] === 0 ? 'N' : 'S';
 
-        var latitude = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 100000;
-        var nsHemi = input.bytes[16] === 0 ? 'N' : 'S';
-
-        var longitude = (input.bytes[17] * 16777216 + input.bytes[18] * 65536 + input.bytes[19] * 256 + input.bytes[20]) / 100000;
-        var ewHemi = input.bytes[21] === 0 ? 'E' : 'W';
+        var longitude = (input.bytes[10] * 16777216 + input.bytes[11] * 65536 + input.bytes[12] * 256 + input.bytes[13]) / 100000;
+        var ewHemi = input.bytes[14] === 0 ? 'E' : 'W';
     } else {
-        var year = 0;
-        var month = 0;
-        var date = 0;
-        var hour = 0;
-        var minute = 0;
-        var second = 0;
-
         var latitude = 0;
         var nsHemi = 'N';
 
         var longitude = 0;
         var ewHemi = 'E';
     }
-
     // Correct hemisphere values based on actual GPS data
     nsHemi = latitude < 0 ? 'S' : 'N';
     ewHemi = longitude < 0 ? 'W' : 'E';
