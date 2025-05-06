@@ -14,15 +14,9 @@ function Decoder(payload, port) {
     var gsensor_onoff = input.bytes[22];
     var gsensor_sensitivity = input.bytes[23];
 
-    var year, month, date, hour, minute, second, latitude, nsHemi, longitude, ewHemi, device_location;
+    var latitude, nsHemi, longitude, ewHemi, device_location;
 
     if (gpsStatus != 0) {
-        year = input.bytes[5] * 256 + input.bytes[6];
-        month = input.bytes[7];
-        date = input.bytes[8];
-        hour = input.bytes[9];
-        minute = input.bytes[10];
-        second = input.bytes[11];
 
         latitude = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 100000;
         nsHemi = input.bytes[16] === 0 ? 'N' : 'S';
@@ -30,13 +24,6 @@ function Decoder(payload, port) {
         longitude = (input.bytes[17] * 16777216 + input.bytes[18] * 65536 + input.bytes[19] * 256 + input.bytes[20]) / 100000;
         ewHemi = input.bytes[21] === 0 ? 'E' : 'W';
     } else {
-        year = 0;
-        month = 0;
-        date = 0;
-        hour = 0;
-        minute = 0;
-        second = 0;
-
         latitude = 0;
         nsHemi = 'N';
 
