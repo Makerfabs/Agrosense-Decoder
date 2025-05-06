@@ -11,17 +11,17 @@ function Decoder(payload, port) {
     var batteryLevel = input.bytes[2] / 10.0;
     var gSensorState = input.bytes[3];
     var gpsStatus = input.bytes[4];
-    var gsensor_onoff = input.bytes[22];
-    var gsensor_sensitivity = input.bytes[23];
+    var gsensor_onoff = input.bytes[15];
+    var gsensor_sensitivity = input.bytes[16];
 
     var latitude, nsHemi, longitude, ewHemi, device_location;
 
     if (gpsStatus != 0) {
 
-        latitude = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 100000;
+        latitude = (input.bytes[5] * 16777216 + input.bytes[6] * 65536 + input.bytes[7] * 256 + input.bytes[8]) / 100000;
         nsHemi = input.bytes[16] === 0 ? 'N' : 'S';
 
-        longitude = (input.bytes[17] * 16777216 + input.bytes[18] * 65536 + input.bytes[19] * 256 + input.bytes[20]) / 100000;
+        longitude = (input.bytes[10] * 16777216 + input.bytes[11] * 65536 + input.bytes[12] * 256 + input.bytes[13]) / 100000;
         ewHemi = input.bytes[21] === 0 ? 'E' : 'W';
     } else {
         latitude = 0;
