@@ -1,0 +1,58 @@
+// This file contains the uplink and downlink for ttn
+
+// Uplink
+function decodeUplink(input) {
+    var Num = input.bytes[0] * 256 + input.bytes[1]
+    var Bat = input.bytes[2] / 10.0 //V
+    var Soil_temp = (input.bytes[3] * 256 + input.bytes[4]) / 100.0 //°C
+    var Soil_RH = input.bytes[5] * 256 + input.bytes[6] //ADC value
+    var Soil_EC = (input.bytes[7] * 256 + input.bytes[8]) / 100.0 //µS/cm
+    var Air_temp = (input.bytes[9] * 256 + input.bytes[10]) / 10.0 //°C
+    var Air_humi = (input.bytes[11] * 256 + input.bytes[12]) / 10.0 //%
+    var time_interval = (input.bytes[13] * 16777216 + input.bytes[14] * 65536 + input.bytes[15] * 256 + input.bytes[16]) / 1000.0 //S
+
+    return {
+        data: {
+            field1: Num,
+            field2: Bat,
+            field3: Soil_temp,
+            field4: Soil_RH,
+            field5: Soil_EC,
+            field6: Air_temp,
+            field7: Air_humi,
+            field8: time_interval,
+        },
+  };
+}
+
+// .................................................................................................
+// .................................................................................................
+// .................................................................................................
+// Downlink.........................................................................................
+// .................................................................................................
+// .................................................................................................
+// .................................................................................................
+// Encoder function to be used in the TTN console for downlink payload
+
+// fPort 1   modification interval
+// Encoder function for port 1
+function Encoder(input) {
+    var minutes = input.minutes;
+
+    // Converting minutes to seconds
+    var seconds = minutes * 60;
+
+    // If the number of seconds is less than 300 seconds, set it to 300 seconds
+    if (seconds < 300) {
+        seconds = 300;
+    }
+
+    var payload = [
+        (seconds >> 24) & 0xFF,
+        (seconds >> 16) & 0xFF,
+        (seconds >> 8) & 0xFF,
+        seconds & 0xFF
+    ];
+
+    return payload;
+}
