@@ -2,7 +2,7 @@
 
 // Uplink
 function decodeUplink(input) {
-    var Num = input.bytes[0] * 256 + input.bytes[1]
+    //var Num = input.bytes[0] * 256 + input.bytes[1]
     var Bat = input.bytes[2] / 10.0 //V
     var Soil_temp = (input.bytes[3] * 256 + input.bytes[4]) / 100.0 //°C
     var Soil_RH = input.bytes[5] * 256 + input.bytes[6] //ADC value
@@ -13,14 +13,14 @@ function decodeUplink(input) {
 
     return {
         data: {
-            field1: Num,
-            field2: Bat,
-            field3: Soil_temp,
-            field4: Soil_RH,
-            field5: Soil_EC,
-            field6: Air_temp,
-            field7: Air_humi,
-            field8: time_interval,
+            //field1: Num,
+            field1: Bat,
+            field2: Soil_temp,
+            field3: Soil_RH,
+            field4: Soil_EC,
+            field5: Air_temp,
+            field6: Air_humi,
+            field7: time_interval,
         },
   };
 }
@@ -51,7 +51,7 @@ function Encoder(input) {
         (seconds >> 24) & 0xFF,
         (seconds >> 16) & 0xFF,
         (seconds >> 8) & 0xFF,
-        seconds & 0xFF
+         seconds & 0xFF
     ];
 
     return payload;

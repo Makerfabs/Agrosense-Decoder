@@ -19,7 +19,7 @@ function Decoder(payload, port) {
 
     var decoded = 
     {
-        NUM:Num
+        //NUM:Num
         BAT:Bat        
         SOIL_TEMP:Soil_temp
         SOIL_RH:Soil_RH
