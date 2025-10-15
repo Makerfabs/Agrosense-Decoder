@@ -1,6 +1,5 @@
-/**
- * String.prototype.repeat() polyfill
- */
+// Encoder function to be used in the datacake console for downlink payload
+//The modification interval corresponds to FPort 1.
 if (!String.prototype.repeat) {
     String.prototype.repeat = function(count) {
         if (this == null) throw new TypeError("can't convert " + this + " to object");

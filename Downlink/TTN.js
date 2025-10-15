@@ -1,4 +1,5 @@
 // Encoder function to be used in the TTN console for downlink payload
+// The modification interval corresponds to FPort 1.
 function Encoder(input) {
     var minutes = input.minutes;
 
