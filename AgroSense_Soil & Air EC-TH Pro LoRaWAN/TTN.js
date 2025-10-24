@@ -27,7 +27,7 @@ function decodeUplink(input) {
             field4: Soil_EC,
             field5: Air_temp,
             field6: Air_humi,
-            field7: time_interval,
+            field7: interval,
         },
   };
 }
