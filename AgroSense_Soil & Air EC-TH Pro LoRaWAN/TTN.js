@@ -4,7 +4,14 @@
 function decodeUplink(input) {
     //var Num = input.bytes[0] * 256 + input.bytes[1]
     var Bat = input.bytes[2] / 10.0 //V
-    var Soil_temp = (input.bytes[3] * 256 + input.bytes[4]) / 100.0 //°C
+    
+    var Soil_temp = (input.bytes[3] * 256 + input.bytes[4])
+    
+    if (Soil_temp >= 0x8000) {
+    Soil_temp -= 0x10000;
+    }
+    Soil_temp= Soil_temp/100 //°C
+
     var Soil_RH = input.bytes[5] * 256 + input.bytes[6] //ADC value
 
     // 1270 corresponds to the ADC value in air, and 815 corresponds to the ADC value in water. 
