@@ -26,7 +26,13 @@ function Decoder(payload, port) {
     var Soil_RH_Percentage=(1270-Soil_RH)*100/(1270-815) //%
 
     var Soil_EC = (input.bytes[7] * 16777216 + input.bytes[8] * 65536 + input.bytes[9] * 256 + input.bytes[10]) / 100.0 //µS/cm
-    var Air_temp = (input.bytes[11] * 256 + input.bytes[12]) / 10.0 //°C
+    var Air_temp = (input.bytes[11] * 256 + input.bytes[12])
+
+    if (Air_temp >= 0x8000) {
+    Air_temp -= 0x10000;
+    }
+    Air_temp = Air_temp / 10.0 //°C
+    
     var Air_humi = (input.bytes[13] * 256 + input.bytes[14]) / 10.0 //%
     var interval = (input.bytes[15] * 16777216 + input.bytes[16] * 65536 + input.bytes[17] * 256 + input.bytes[18]) / 1000.0 //S
 
