@@ -98,3 +98,23 @@ function Encoder(measurements, port) {
         });
 }
 
+// fPort 3   Adjust CO2 Preheating Time (1-5mins)
+function Encoder(measurements, port) {
+
+    var preheat = measurements["CO2_PREHEAT_TIME"].value * 60;
+
+    // limit range 1–5 minutes
+    if (preheat < 60) {
+        preheat = 60;
+    }
+
+    if (preheat > 300) {
+        preheat = 300;
+    }
+
+    // convert to 2 bytes
+    var high = (preheat >> 8) & 0xFF;
+    var low  = preheat & 0xFF;
+
+    return [high, low];
+}
