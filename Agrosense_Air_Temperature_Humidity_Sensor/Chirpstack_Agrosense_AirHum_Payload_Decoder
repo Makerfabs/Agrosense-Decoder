@@ -1,0 +1,78 @@
+// ChirpStack v4 Payload codec for AgroSense AGLWTH01 (Air Temp & Humidity)
+// - Uplink: decodes to ThingsBoard-friendly keys
+// - Downlink: encodes {"minutes": 20} to device bytes (interval 5..1440 min)
+// Source payload definition + interval range from manual. :contentReference[oaicite:0]{index=0}
+
+function decodeUplink(input) {
+  var b = input.bytes || [];
+
+  // Need at least: seq(2) + bat(1) + hum(2) + temp(2) = 7 bytes
+  if (b.length < 7) {
+    return { errors: ["payload too short: " + b.length] };
+  }
+
+  // Sequence counter (uint16)
+  var sequence = (b[0] << 8) | b[1];
+
+  // Battery voltage (V) = value/10
+  var battery = b[2] / 10.0;
+
+  // Humidity (%RH) = uint16/10
+  var humidityRaw = (b[3] << 8) | b[4];
+  var humidity = humidityRaw / 10.0;
+
+  // Temperature (°C) = int16/10
+  var tempRaw = (b[5] << 8) | b[6];
+  if (tempRaw & 0x8000) tempRaw -= 0x10000;
+  var temperature = tempRaw / 10.0;
+
+  // ThingsBoard-friendly telemetry keys
+  // (simple flat keys: ideal for TB MQTT/HTTP integrations)
+  var data = {
+    battery: battery,
+    humidity: humidity,
+    temperature: temperature,
+    sequence: sequence
+  };
+
+  // Optional NC bytes, if present
+  if (b.length >= 9) {
+    data.nc1 = b[7];
+    data.nc2 = b[8];
+  }
+
+  // Optional: include port for routing/debug
+  if (typeof input.fPort !== "undefined") {
+    data.fPort = input.fPort;
+  }
+
+  return { data: data };
+}
+
+// Downlink encoder: set report interval
+// Use in ChirpStack downlink queue as JSON:
+//   { "minutes": 20 }
+// Encoded as 2 bytes big-endian, fPort 1.
+// Only works if your device expects the interval as 2-byte minutes payload on that port.
+function encodeDownlink(input) {
+  if (!input || !input.data || typeof input.data.minutes === "undefined") {
+    return { errors: ["Missing input.data.minutes"] };
+  }
+
+  var minutes = Number(input.data.minutes);
+
+  if (!Number.isFinite(minutes)) {
+    return { errors: ["minutes is not a valid number"] };
+  }
+
+  minutes = Math.round(minutes);
+
+  if (minutes < 5 || minutes > 1440) {
+    return { errors: ["minutes out of range (5..1440): " + minutes] };
+  }
+
+  return {
+    bytes: [(minutes >> 8) & 0xff, minutes & 0xff],
+    fPort: 1
+  };
+}
