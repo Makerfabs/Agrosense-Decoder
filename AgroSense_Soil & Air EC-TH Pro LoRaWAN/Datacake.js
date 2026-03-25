@@ -47,7 +47,7 @@ function Decoder(payload, port) {
 
     /*
     Note:
-    The last bit (the 23 bytes for firmware with a timestamp, and the 19 bytes for firmware without a timestamp)
+    The last byte (the 23 bytes for firmware with a timestamp, and the 19 bytes for firmware without a timestamp)
     is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
     */
    

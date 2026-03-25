@@ -35,7 +35,7 @@ function decodeUplink(input) {
     
     /*
     Note:
-    The last bit (the 16 bytes for firmware with a timestamp, and the 12 bytes for firmware without a timestamp)
+    The last byte (the 16 bytes for firmware with a timestamp, and the 12 bytes for firmware without a timestamp)
     is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
     */
 

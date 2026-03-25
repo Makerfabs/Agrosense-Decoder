@@ -25,6 +25,12 @@ function Decoder(payload, port) {
                 input.bytes[14]);
     }
 
+    /*
+    Note:
+    The last byte (the 15 bytes for firmware with a timestamp, and the 11 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+   
     var decoded = {
         bat: bat,
         humidity: humidity,
