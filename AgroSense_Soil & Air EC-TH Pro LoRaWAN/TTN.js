@@ -30,6 +30,29 @@ function decodeUplink(input) {
     var Air_humi = (input.bytes[13] * 256 + input.bytes[14]) / 10.0 //%
     var interval = (input.bytes[15] * 16777216 + input.bytes[16] * 65536 + input.bytes[17] * 256 + input.bytes[18]) / 1000.0 //S
 
+    var time = null;
+    var timeStr = null;
+    
+    if (input.bytes.length >= 23) {
+        time = (input.bytes[19]*16777216 + input.bytes[20]*65536 + input.bytes[21]*256 + input.bytes[22]);
+
+        var d = new Date(time * 1000);
+        
+        timeStr =
+              d.getUTCFullYear() + "-" +
+              String(d.getUTCMonth() + 1).padStart(2, "0") + "-" +
+              String(d.getUTCDate()).padStart(2, "0") + " " +
+              String(d.getUTCHours()).padStart(2, "0") + ":" +
+              String(d.getUTCMinutes()).padStart(2, "0") + ":" +
+              String(d.getUTCSeconds()).padStart(2, "0");
+    }
+
+    /*
+    Note:
+    The last bit (the 23 bytes for firmware with a timestamp, and the 19 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+
     return {
         data: {
             //field1: Num,
@@ -41,6 +64,8 @@ function decodeUplink(input) {
             field5: Air_temp,
             field6: Air_humi,
             field7: interval,
+            device_time: timeStr,
+            device_time_unix: time
         },
   };
 }

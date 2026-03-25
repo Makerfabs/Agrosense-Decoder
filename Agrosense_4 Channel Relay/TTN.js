@@ -27,6 +27,30 @@ function decodeUplink(input) {
     bytes[21]
   ) / 1000;
 
+  var time = null;
+  var timeStr = null;
+
+  if (bytes.length >= 26) {
+
+    time = (bytes[22]*16777216 + bytes[23]*65536 + bytes[24]*256 + bytes[25]);
+
+    var d = new Date(time * 1000);
+
+    timeStr =
+          d.getUTCFullYear() + "-" +
+          String(d.getUTCMonth() + 1).padStart(2, "0") + "-" +
+          String(d.getUTCDate()).padStart(2, "0") + " " +
+          String(d.getUTCHours()).padStart(2, "0") + ":" +
+          String(d.getUTCMinutes()).padStart(2, "0") + ":" +
+          String(d.getUTCSeconds()).padStart(2, "0");
+  }
+
+  /*
+  Note:
+  The last bit (the 26 bytes for firmware with a timestamp, and the 22 bytes for firmware without a timestamp)
+  is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+  */
+
   return {
     data: {
       field1: Relay_1,//RELAY1   :0-OFF; 1-ON
@@ -37,7 +61,9 @@ function decodeUplink(input) {
       field6: INA_2,//0-5V ADC
       field7: temperature,
       field8: humidity,
-      interval: interval
+      interval: interval,
+      device_time: timeStr,
+      device_time_unix: time
     },
     warnings: [],
     errors: []

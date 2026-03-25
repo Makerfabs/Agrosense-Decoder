@@ -13,7 +13,28 @@ function decodeUplink(input) {
   var flow_rate = flow_pulse_1s_diff/450; //L
   var Valve_on_all_time =  input.bytes[6]* 16777216 + input.bytes[7]* 65536 + input.bytes[8] * 256 + input.bytes[9]; //Time from opening to closing of the latest valve
   var interval = (input.bytes[10]* 16777216 + input.bytes[11]* 65536 + input.bytes[12] * 256 + input.bytes[13]) / 1000; //interval when valve is open
+  
+  var time = null;
+  var timeStr = null;
 
+  if (input.bytes.length >= 18) {
+    time = (input.bytes[14]*16777216 + input.bytes[15]*65536 + input.bytes[16]*256 + input.bytes[17]);
+
+    var d = new Date(time * 1000);
+    
+    timeStr =
+          d.getUTCFullYear() + "-" +
+          String(d.getUTCMonth() + 1).padStart(2, "0") + "-" +
+          String(d.getUTCDate()).padStart(2, "0") + " " +
+          String(d.getUTCHours()).padStart(2, "0") + ":" +
+          String(d.getUTCMinutes()).padStart(2, "0") + ":" +
+          String(d.getUTCSeconds()).padStart(2, "0");
+  }
+
+  /*
+  The last bit (the 18 bytes for firmware with a timestamp, and the 14 bytes for firmware without a timestamp)
+  is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+  */
 
   return {
     data: {
@@ -24,6 +45,8 @@ function decodeUplink(input) {
       field5: flow_rate,
       field6: Valve_on_all_time,
       field7: interval,
+      device_time: timeStr,
+      device_time_unix: time
     },
     warnings: [],
     errors: []

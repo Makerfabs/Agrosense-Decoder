@@ -8,12 +8,41 @@ function decodeUplink(input) {
     var bat = input.bytes[2] / 10.0
     var light = (input.bytes[3] * 16777216 + input.bytes[4] * 65536 + input.bytes[5] * 256 + input.bytes[6]) / 100.0
 
-    return {
-        data: {
+    var interval = (input.bytes[7] * 16777216 + input.bytes[8] * 65536 + input.bytes[9] * 256 + input.bytes[10]) / 1000
+
+    var time = null;
+    var timeStr = null;
+    
+    if (input.bytes.length >= 15) {
+
+        time = (input.bytes[11]*16777216 + input.bytes[12]*65536 + input.bytes[13]*256 + input.bytes[14]);
+
+        var d = new Date(time * 1000);
+        
+        timeStr =
+              d.getUTCFullYear() + "-" +
+              String(d.getUTCMonth() + 1).padStart(2, "0") + "-" +
+              String(d.getUTCDate()).padStart(2, "0") + " " +
+              String(d.getUTCHours()).padStart(2, "0") + ":" +
+              String(d.getUTCMinutes()).padStart(2, "0") + ":" +
+              String(d.getUTCSeconds()).padStart(2, "0");
+    }
+    
+    /*
+    Note:
+    The last bit (the 15 bytes for firmware with a timestamp, and the 11 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+
+        if (Significant) {
+          return {
+            data: {
             field1: bat,
             field2: light,
+            field3: interval,
+            device_time: timeStr,
+            device_time_unix: time
         },
-
     };
 }
 

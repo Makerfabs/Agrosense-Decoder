@@ -14,30 +14,55 @@ function decodeUplink(input) {
   }
   temp = temp / 10.0
 
-var ec = (input.bytes[8] * 256 + input.bytes[9])
-var ph = (input.bytes[10] * 256 + input.bytes[11]) / 10.0
+  var ec = (input.bytes[8] * 256 + input.bytes[9])
+  var ph = (input.bytes[10] * 256 + input.bytes[11]) / 10.0
   var interval = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 1000
 
+  var time = null;
+  var timeStr = null;
   
-      if (Significant) {
-        return {
-          data: {
-          field1: bat,
-          field2: humi,
-          field3: temp,
-          field4: ec,
-          field5: ph,
-          field6: interval,
-          },
-        };
-      }
-      else {
-        return {
-          data: {
-          Significant: "data invalid",
-          },
-        };
-      }
+  if (input.bytes.length >= 20) {
+    time = (input.bytes[16]* 16777216 + input.bytes[17]* 65536 + input.bytes[18] * 256 + input.bytes[19]); //interval when valve is open
+
+    var d = new Date(time * 1000);
+
+    // 格式化为 "YYYY-MM-DD HH:mm:ss"（UTC）
+    timeStr =
+        d.getUTCFullYear() + "-" +
+        String(d.getUTCMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getUTCDate()).padStart(2, "0") + " " +
+        String(d.getUTCHours()).padStart(2, "0") + ":" +
+        String(d.getUTCMinutes()).padStart(2, "0") + ":" +
+        String(d.getUTCSeconds()).padStart(2, "0");
+  }
+  
+  /*
+  Note:
+  The last bit (the 20 bytes for firmware with a timestamp, and the 16 bytes for firmware without a timestamp)
+  is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+  */
+  
+    if (Significant) {
+      return {
+        data: {
+        field1: bat,
+        field2: humi,
+        field3: temp,
+        field4: ec,
+        field5: ph,
+        field6: interval,
+        device_time: timeStr,
+        device_time_unix: time
+        },
+      };
+    }
+    else {
+      return {
+        data: {
+        Significant: "data invalid",
+        },
+      };
+    }
 }
 
 // .................................................................................................
