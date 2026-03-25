@@ -9,7 +9,21 @@ function Decoder(payload, port) {
     var water_leak_cnt = input.bytes[4] * 256 + input.bytes[5];
     var water_leak_time =  input.bytes[6] * 16777216 + input.bytes[7] * 65536 + input.bytes[8] * 256 + input.bytes[9];
 
+    var time = null;
 
+    if(input.bytes.length >= 14){
+        time = (input.bytes[10] * 16777216 +
+                input.bytes[11] * 65536 +
+                input.bytes[12] * 256 +
+                input.bytes[13]);
+    }
+
+    /*
+    Note:
+    The last bit (the 14 bytes for firmware with a timestamp, and the 10 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+   
     var decoded = {
         bat: bat,
         water_leak_flag: water_leak_flag, //Normal is 0,leakage is 1.
@@ -30,13 +44,26 @@ function Decoder(payload, port) {
         console.log('Error occurred while decoding LoRa properties: ' + error);
     }
 
-    return [
-        { field: "bat", value: decoded.bat },
-        { field: "water_leak_flag", value: decoded.water_leak_flag },
-        { field: "water_leak_cnt", value: decoded.water_leak_cnt },
-        { field: "water_leak_time", value: decoded.water_leak_time },
-        { field: "lora_rssi", value: decoded.lora_rssi },
-        { field: "lora_snr", value: decoded.lora_snr },
-        { field: "lora_datarate", value: decoded.lora_datarate }
-    ];
+    if(time != null){
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "water_leak_flag", value: decoded.water_leak_flag, timestamp: time },
+            { field: "water_leak_cnt", value: decoded.water_leak_cnt, timestamp: time },
+            { field: "water_leak_time", value: decoded.water_leak_time, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
+    else{
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "water_leak_flag", value: decoded.water_leak_flag },
+            { field: "water_leak_cnt", value: decoded.water_leak_cnt },
+            { field: "water_leak_time", value: decoded.water_leak_time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
 }

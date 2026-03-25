@@ -16,6 +16,23 @@ function Decoder(payload, port) {
     var Differentialbits = (input.bytes[11] * 256 + input.bytes[12]) / 1000.0 //V
     var time_interval = (input.bytes[13] * 16777216 + input.bytes[14] * 65536 + input.bytes[15] * 256 + input.bytes[16]) / 1000.0//S
 
+    // No timestamp by default
+    var time = null;
+
+    // Check if there is a timestamp
+    if (input.bytes.length >= 21) {
+        time = (input.bytes[17] * 16777216 +
+                input.bytes[18] * 65536 +
+                input.bytes[19] * 256 +
+                input.bytes[20]);
+    }
+
+    /*
+    Note:
+    The last bit (the 21 bytes for firmware with a timestamp, and the 17 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+   
     var decoded = {
         bat: bat,
         ADC1: ADC1
@@ -23,6 +40,7 @@ function Decoder(payload, port) {
         ADC3: ADC3
         ADC4: ADC4
         Differentialbits: Differentialbits
+        time_interval: time_interval
     };
 
     // Test for LoRa properties in normalizedPayload
@@ -38,17 +56,34 @@ function Decoder(payload, port) {
         console.log('Error occurred while decoding LoRa properties: ' + error);
     }
 
-    return [
-        { field: "bat", value: decoded.bat },
-        { field: "ADC1", value: decoded.ADC1 },
-        { field: "ADC2", value: decoded.ADC2 },
-        { field: "ADC3", value: decoded.ADC3 },
-        { field: "ADC4", value: decoded.ADC4 },
-        { field: " Differentialbits", value: decoded. Differentialbits },
-        { field: "lora_rssi", value: decoded.lora_rssi },
-        { field: "lora_snr", value: decoded.lora_snr },
-        { field: "lora_datarate", value: decoded.lora_datarate }
-    ];
+    if (time != null) {
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "ADC1", value: decoded.ADC1, timestamp: time },
+            { field: "ADC2", value: decoded.ADC2, timestamp: time },
+            { field: "ADC3", value: decoded.ADC3, timestamp: time },
+            { field: "ADC4", value: decoded.ADC4, timestamp: time },
+            { field: " Differentialbits", value: decoded. Differentialbits, timestamp: time },
+            { field: "time_interval", value: decoded.time_interval, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
+    else{
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "ADC1", value: decoded.ADC1 },
+            { field: "ADC2", value: decoded.ADC2 },
+            { field: "ADC3", value: decoded.ADC3 },
+            { field: "ADC4", value: decoded.ADC4 },
+            { field: " Differentialbits", value: decoded. Differentialbits },
+            { field: "time_interval", value: decoded.time_interval },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
 }
 
 

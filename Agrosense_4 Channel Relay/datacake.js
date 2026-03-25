@@ -16,15 +16,31 @@ function Decoder(payload, port) {
     var humidity = ( input.bytes[6] * 256 + input.bytes[7] ) / 10.0
     var temperature = input.bytes[8] * 256 + input.bytes[9]
     if (temperature >= 0x8000) 
-	{
+	  {
        		 temperature -= 0x10000;
-   	 }
+   	}
     temperature = temperature / 10.0
     
     var INA_1 = ( input.bytes[10] * 256 + input.bytes[11] ) / 10.0
     var INA_2 = ( input.bytes[12] *256 + input.bytes[13] ) / 10.0
     
     var interval = (input.bytes[18]* 16777216 + input.bytes[19]* 65536 + input.bytes[20] * 256 + input.bytes[21]) / 1000
+
+    var time = null;
+
+    // Check if there is a timestamp
+    if (input.bytes.length >= 26) {
+        time = (input.bytes[22] * 16777216 +
+                input.bytes[23] * 65536 +
+                input.bytes[24] * 256 +
+                input.bytes[25]);
+    }
+
+    /*
+    Note:
+    The last bit (the 26 bytes for firmware with a timestamp, and the 22 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
 
     var decoded = 
     {
@@ -34,49 +50,66 @@ function Decoder(payload, port) {
         Relay_4:Relay_4,
         INA_1:INA_1,
         INA_2:INA_2,
-	    temperature:temperature,
-	    humidity:humidity,
-	    interval:interval,
+        temperature:temperature,
+        humidity:humidity,
+        interval:interval,
     };
 
     // Test for LoRa properties in normalizedPayload
- try {
+    try {
+      if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
+        decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
+        decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
+      } else {
+        decoded.lora_rssi = 0;
+        decoded.lora_snr = 0;
+      }
 
-  if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
-    decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
-    decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
-  } else {
-    decoded.lora_rssi = 0;
-    decoded.lora_snr = 0;
-  }
-
-
-  decoded.lora_datarate = normalizedPayload.spreading_factor 
-                       || normalizedPayload.data_rate 
-                       || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
-                       || "unknown";
+    decoded.lora_datarate = normalizedPayload.spreading_factor 
+                        || normalizedPayload.data_rate 
+                        || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
+                        || "unknown";
   
-} catch (error) {
-  console.log('LoRa property parsing error:', error);
-  decoded.lora_rssi = 0;
-  decoded.lora_snr = 0;
-  decoded.lora_datarate = "unknown";
-}
+    } catch (error) {
+      console.log('LoRa property parsing error:', error);
+      decoded.lora_rssi = 0;
+      decoded.lora_snr = 0;
+      decoded.lora_datarate = "unknown";
+    }
 
-return [
-  { field: "Relay_1", value: decoded.Relay_1 },
-  { field: "Relay_2", value: decoded.Relay_2 },
-  { field: "Relay_3", value: decoded.Relay_3 },
-  { field: "Relay_4", value: decoded.Relay_4 },
-  { field: "INA_1", value: decoded.INA_1 },
-  { field: "INA_2", value: decoded.INA_2 },
-  { field: "humidity", value: decoded.humidity },
-  { field: "temperature", value: decoded.temperature },
-  { field: "interval", value: decoded.interval },
-  { field: "lora_rssi", value: decoded.lora_rssi },
-  { field: "lora_snr", value: decoded.lora_snr },
-  { field: "lora_datarate", value: decoded.lora_datarate },
-];
+    if (time !== null) {
+      return [
+        { field: "Relay_1", value: decoded.Relay_1, timestamp: time },
+        { field: "Relay_2", value: decoded.Relay_2, timestamp: time },
+        { field: "Relay_3", value: decoded.Relay_3, timestamp: time },
+        { field: "Relay_4", value: decoded.Relay_4, timestamp: time },
+        { field: "INA_1", value: decoded.INA_1, timestamp: time },
+        { field: "INA_2", value: decoded.INA_2, timestamp: time },
+        { field: "humidity", value: decoded.humidity, timestamp: time },
+        { field: "temperature", value: decoded.temperature, timestamp: time },
+        { field: "interval", value: decoded.interval, timestamp: time },
+        { field: "lora_rssi", value: decoded.lora_rssi },
+        { field: "lora_snr", value: decoded.lora_snr },
+        { field: "lora_datarate", value: decoded.lora_datarate },
+      ];
+    }
+    else{
+      return [
+        { field: "Relay_1", value: decoded.Relay_1 },
+        { field: "Relay_2", value: decoded.Relay_2 },
+        { field: "Relay_3", value: decoded.Relay_3 },
+        { field: "Relay_4", value: decoded.Relay_4 },
+        { field: "INA_1", value: decoded.INA_1 },
+        { field: "INA_2", value: decoded.INA_2 },
+        { field: "humidity", value: decoded.humidity },
+        { field: "temperature", value: decoded.temperature },
+        { field: "interval", value: decoded.interval },
+        { field: "lora_rssi", value: decoded.lora_rssi },
+        { field: "lora_snr", value: decoded.lora_snr },
+        { field: "lora_datarate", value: decoded.lora_datarate },
+      ];
+    }
+    
 }
 
 

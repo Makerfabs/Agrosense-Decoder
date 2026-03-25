@@ -1,7 +1,3 @@
-// This file contains the uplink and downlink for datacake
-
-// Uplink
-
 function Decoder(payload, port) {
     var input = {
         bytes: payload
@@ -16,11 +12,24 @@ function Decoder(payload, port) {
     }
     temperature = temperature / 10.0
 
+    var interval = (input.bytes[7] * 16777216 + input.bytes[8] * 65536 + input.bytes[9] * 256 + input.bytes[10]) / 1000;
+
+    // No timestamp by default
+    var time = null;
+
+    // Check if there is a timestamp
+    if (input.bytes.length >= 15) {
+        time = (input.bytes[11] * 16777216 +
+                input.bytes[12] * 65536 +
+                input.bytes[13] * 256 +
+                input.bytes[14]);
+    }
 
     var decoded = {
         bat: bat,
         humidity: humidity,
         temperature: temperature,
+        interval: interval,
     };
 
     // Test for LoRa properties in normalizedPayload
@@ -36,14 +45,28 @@ function Decoder(payload, port) {
         console.log('Error occurred while decoding LoRa properties: ' + error);
     }
 
-    return [
-        { field: "bat", value: decoded.bat },
-        { field: "humidity", value: decoded.humidity },
-        { field: "temperature", value: decoded.temperature },
-        { field: "lora_rssi", value: decoded.lora_rssi },
-        { field: "lora_snr", value: decoded.lora_snr },
-        { field: "lora_datarate", value: decoded.lora_datarate }
-    ];
+    if (time !== null) {
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "humidity", value: decoded.humidity, timestamp: time },
+            { field: "temperature", value: decoded.temperature, timestamp: time },
+            { field: "interval", value: decoded.interval, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
+    else{
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "humidity", value: decoded.humidity },
+            { field: "temperature", value: decoded.temperature },
+            { field: "interval", value: decoded.interval },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
 }
 
 // .................................................................................................
@@ -105,4 +128,3 @@ function Encoder(measurements, port) {
             return parseInt(f, 16);
         });
 }
-

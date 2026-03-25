@@ -10,10 +10,29 @@ function Decoder(payload, port) {
     // var num = input.bytes[0] * 256 + input.bytes[1];
     var bat = input.bytes[2] / 10.0;
     var light = (input.bytes[3] * 16777216 + input.bytes[4] * 65536 + input.bytes[5] * 256 + input.bytes[6]) / 100.0;
+    var interval = (input.bytes[7] * 16777216 + input.bytes[8] * 65536 + input.bytes[9] * 256 + input.bytes[10]) / 1000.0;
+
+    // No timestamp by default
+    var time = null;
+
+    // Check if there is a timestamp
+    if (input.bytes.length >= 15) {
+        time = (input.bytes[11] * 16777216 +
+                input.bytes[12] * 65536 +
+                input.bytes[13] * 256 +
+                input.bytes[14]);
+    }
+
+    /*
+    Note:
+    The last bit (the 15 bytes for firmware with a timestamp, and the 11 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
 
     var decoded = {
         bat: bat,
         light: light,
+        interval: interval,
     };
 
     // Test for LoRa properties in normalizedPayload
@@ -29,13 +48,25 @@ function Decoder(payload, port) {
         console.log('Error occurred while decoding LoRa properties: ' + error);
     }
 
-    return [
-        { field: "bat", value: decoded.bat },
-        { field: "light", value: decoded.light },
-        { field: "lora_rssi", value: decoded.lora_rssi },
-        { field: "lora_snr", value: decoded.lora_snr },
-        { field: "lora_datarate", value: decoded.lora_datarate }
-    ];
+    if (time != null) {
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "light", value: decoded.light, timestamp: time },
+            { field: "interval", value: interval, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    } else {
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "light", value: decoded.light },
+            { field: "interval", value: interval },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
 }
 
 // .................................................................................................

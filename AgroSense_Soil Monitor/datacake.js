@@ -17,9 +17,24 @@ function Decoder(payload, port) {
         temp -= 0x10000;
     }
     temp = temp / 10.0
-   var ec = (input.bytes[8] * 256 + input.bytes[9])
+    var ec = (input.bytes[8] * 256 + input.bytes[9])
     var ph = (input.bytes[10] * 256 + input.bytes[11]) / 10.0
     var interval = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 1000
+
+    var time = null;
+
+    if(input.bytes.length >= 20){
+        time = (input.bytes[16] * 16777216 +
+                input.bytes[17] * 65536 +
+                input.bytes[18] * 256 +
+                input.bytes[19]);
+    }
+
+    /*
+    Note:
+    The last bit (the 20 bytes for firmware with a timestamp, and the 16 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
 
     var decoded = {
         bat: bat,
@@ -27,7 +42,7 @@ function Decoder(payload, port) {
         humi: humi,
         temp: temp,
         ec: ec,
-	ph: ph,
+	    ph: ph,
         interval: interval,
     };
 
@@ -45,19 +60,33 @@ function Decoder(payload, port) {
     }
 
     if (Significant) {
-        return [
-            { field: "bat", value: decoded.bat },
-            { field: "humi", value: decoded.humi },
-            { field: "temp", value: decoded.temp },
-	    { field: "ec", value: decoded.ec },
-	    { field: "ph", value: decoded.ph },
-            { field: "interval", value: decoded.interval },
-            { field: "lora_rssi", value: decoded.lora_rssi },
-            { field: "lora_snr", value: decoded.lora_snr },
-            { field: "lora_datarate", value: decoded.lora_datarate }
-        ];
+        if(time !== null){
+            return [
+                { field: "bat", value: decoded.bat, timestamp: time },
+                { field: "humi", value: decoded.humi, timestamp: time },
+                { field: "temp", value: decoded.temp, timestamp: time },
+                { field: "ec", value: decoded.ec, timestamp: time },
+                { field: "ph", value: decoded.ph, timestamp: time },
+                { field: "interval", value: decoded.interval, timestamp: time },
+                { field: "lora_rssi", value: decoded.lora_rssi },
+                { field: "lora_snr", value: decoded.lora_snr },
+                { field: "lora_datarate", value: decoded.lora_datarate }
+            ];
+        }
+        else{
+            return [
+                { field: "bat", value: decoded.bat },
+                { field: "humi", value: decoded.humi },
+                { field: "temp", value: decoded.temp },
+                { field: "ec", value: decoded.ec },
+                { field: "ph", value: decoded.ph },
+                { field: "interval", value: decoded.interval },
+                { field: "lora_rssi", value: decoded.lora_rssi },
+                { field: "lora_snr", value: decoded.lora_snr },
+                { field: "lora_datarate", value: decoded.lora_datarate }
+            ];
+        }
     }
-
     else {
         return [
             { field: "Significant", value: "data invalid" },

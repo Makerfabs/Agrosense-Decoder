@@ -14,9 +14,25 @@ function Decoder(payload, port) {
         Pipe_Pressure = Math.round(Pipe_Pressure * 1000) / 1000;  // keep three decimal places
     var time_interval = (input.bytes[13] * 16777216 + input.bytes[14] * 65536 + input.bytes[15] * 256 + input.bytes[16]) / 1000.0//S
 
+    var time = null;
+
+    if(input.bytes.length >= 21){
+        time = (input.bytes[17] * 16777216 +
+                input.bytes[18] * 65536 +
+                input.bytes[19] * 256 +
+                input.bytes[20]);
+    }
+
+    /*
+    Note:
+    The last bit (the 21 bytes for firmware with a timestamp, and the 17 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+   
     var decoded = {
         bat: bat,
-       Pipe_Pressure: Pipe_Pressure,
+        Pipe_Pressure: Pipe_Pressure,
+        time_interval: time_interval,
     };
 
     // Test for LoRa properties in normalizedPayload
@@ -32,13 +48,26 @@ function Decoder(payload, port) {
         console.log('Error occurred while decoding LoRa properties: ' + error);
     }
 
-    return [
-        { field: "bat", value: decoded.bat },
-        { field: "Pipe_Pressure", value: decoded. Pipe_Pressure },
-        { field: "lora_rssi", value: decoded.lora_rssi },
-        { field: "lora_snr", value: decoded.lora_snr },
-        { field: "lora_datarate", value: decoded.lora_datarate }
-    ];
+    if(time != null){
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "Pipe_Pressure", value: decoded.Pipe_Pressure, timestamp: time },
+            { field: "time_interval", value: decoded.time_interval, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi, timestamp: time },
+            { field: "lora_snr", value: decoded.lora_snr, timestamp: time },
+            { field: "lora_datarate", value: decoded.lora_datarate, timestamp: time }
+        ];
+    }
+    else{
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "Pipe_Pressure", value: decoded.Pipe_Pressure },
+            { field: "time_interval", value: decoded.time_interval },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
 }
 
 

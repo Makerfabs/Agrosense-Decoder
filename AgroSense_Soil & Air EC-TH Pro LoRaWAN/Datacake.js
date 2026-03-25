@@ -36,43 +36,82 @@ function Decoder(payload, port) {
     var Air_humi = (input.bytes[13] * 256 + input.bytes[14]) / 10.0 //%
     var interval = (input.bytes[15] * 16777216 + input.bytes[16] * 65536 + input.bytes[17] * 256 + input.bytes[18]) / 1000.0 //S
 
+    var time = null;
+
+    if(input.bytes.length >= 23){
+        time = (input.bytes[19] * 16777216 +
+                input.bytes[20] * 65536 +
+                input.bytes[21] * 256 +
+                input.bytes[22]);
+    }
+
+    /*
+    Note:
+    The last bit (the 23 bytes for firmware with a timestamp, and the 19 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+   
     var decoded = 
     {
-        //NUM:Num
-        BAT:Bat        
-        SOIL_TEMP:Soil_temp
-        //SOIL_RH:Soil_RH
-        SOIL_RH_PERCENTAGE:Soil_RH_Percentage
-        SOIL_EC:Soil_EC
-        AIR_TEMP:Air_temp
-        AIR_HUMI:Air_humi
-        INTERVAL:interval
+        //NUM:Num,
+        BAT:Bat,        
+        SOIL_TEMP:Soil_temp,
+        //SOIL_RH:Soil_RH,
+        SOIL_RH_PERCENTAGE:Soil_RH_Percentage,
+        SOIL_EC:Soil_EC,
+        AIR_TEMP:Air_temp,
+        AIR_HUMI:Air_humi,  
+        INTERVAL:interval,
     };
 
     // Test for LoRa properties in normalizedPayload
- try {
+    try {
+        if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
+            decoded.LORA_RSSI = normalizedPayload.gateways[0].rssi || 0;
+            decoded.LORA_SNR = normalizedPayload.gateways[0].snr || 0;
+        } else {
+            decoded.LORA_RSSI = 0;
+            decoded.LORA_SNR = 0;
+        }
 
-  if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
-    decoded.LORA_RSSI = normalizedPayload.gateways[0].rssi || 0;
-    decoded.LORA_SNR = normalizedPayload.gateways[0].snr || 0;
-  } else {
+        decoded.LORA_DATARATE = normalizedPayload.spreading_factor 
+                            || normalizedPayload.data_rate 
+                            || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
+                            || "unknown";
+        
+    } catch (error) {
+    console.log('LoRa property parsing error:', error);
     decoded.LORA_RSSI = 0;
     decoded.LORA_SNR = 0;
-  }
+    decoded.LORA_DATARATE = "unknown";
+    }
 
-  decoded.LORA_DATARATE = normalizedPayload.spreading_factor 
-                       || normalizedPayload.data_rate 
-                       || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
-                       || "unknown";
-  
-} catch (error) {
-  console.log('LoRa property parsing error:', error);
-  decoded.LORA_RSSI = 0;
-  decoded.LORA_SNR = 0;
-  decoded.LORA_DATARATE = "unknown";
-}
-
-return decoded;
+    if(time !== null){
+        return [
+            { field: "BAT", value: decoded.bat, timestamp: time },
+            { field: "SOIL_TEMP", value: decoded.Soil_temp, timestamp: time },
+            { field: "SOIL_RH_PERCENTAGE", value: decoded.Soil_RH_Percentage, timestamp: time },
+            { field: "SOIL_EC", value: decoded.Soil_EC, timestamp: time },
+            { field: "AIR_TEMP", value: decoded.Air_temp, timestamp: time },
+            { field: "AIR_HUMI", value: decoded.Air_humi, timestamp: time },
+            { field: "LORA_RSSI", value: decoded.lora_rssi },
+            { field: "LORA_SNR", value: decoded.lora_snr },
+            { field: "LORA_DATARATE", value: decoded.lora_datarate }
+        ];
+    }
+    else{
+        return [
+            { field: "BAT", value: decoded.bat },
+            { field: "SOIL_TEMP", value: decoded.Soil_temp },
+            { field: "SOIL_RH_PERCENTAGE", value: decoded.Soil_RH_Percentage },
+            { field: "SOIL_EC", value: decoded.Soil_EC },
+            { field: "AIR_TEMP", value: decoded.Air_temp },
+            { field: "AIR_HUMI", value: decoded.Air_humi },
+            { field: "LORA_RSSI", value: decoded.lora_rssi },
+            { field: "LORA_SNR", value: decoded.lora_snr },
+            { field: "LORA_DATARATE", value: decoded.lora_datarate }
+        ];
+    }
 }
 
 // .................................................................................................

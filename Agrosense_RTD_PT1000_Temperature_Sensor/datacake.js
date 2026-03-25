@@ -16,9 +16,27 @@ function Decoder(payload, port) {
     }
     temp = temp / 100.0;
     
+    var time_interval = (input.bytes[5] * 16777216 + input.bytes[6] * 65536 + input.bytes[7] * 256 + input.bytes[8]) / 1000.0//S
+
+    var time = null;
+
+    if(input.bytes.length >= 13){
+        time = (input.bytes[9] * 16777216 +
+                input.bytes[10] * 65536 +
+                input.bytes[11] * 256 +
+                input.bytes[12]);
+    }
+
+    /*
+    Note:
+    The last bit (the 13 bytes for firmware with a timestamp, and the 9 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+   
     var decoded = {
         bat: bat,
         temp: temp,
+        time_interval: time_interval,
     };
 
     // Test for LoRa properties in normalizedPayload
@@ -34,13 +52,27 @@ function Decoder(payload, port) {
         console.log('Error occurred while decoding LoRa properties: ' + error);
     }
 
-    return [
-        { field: "bat", value: decoded.bat },
-        { field: "temp", value: decoded.temp },
-        { field: "lora_rssi", value: decoded.lora_rssi },
-        { field: "lora_snr", value: decoded.lora_snr },
-        { field: "lora_datarate", value: decoded.lora_datarate }
-    ];
+
+    if(time !== null){
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "temp", value: decoded.temp, timestamp: time  },
+            { field: "time_interval", value: decoded.time_interval, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
+    else{
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "temp", value: decoded.temp },
+            { field: "time_interval", value: decoded.time_interval },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    } 
 }
 
 // .................................................................................................

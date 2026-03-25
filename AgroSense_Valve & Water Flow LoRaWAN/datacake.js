@@ -17,42 +17,80 @@ function Decoder(payload, port) {
     var Valve_on_all_time =  input.bytes[6]* 16777216 + input.bytes[7]* 65536 + input.bytes[8] * 256 + input.bytes[9] //Time from opening to closing of the latest valve
     var interval = (input.bytes[10]* 16777216 + input.bytes[11]* 65536 + input.bytes[12] * 256 + input.bytes[13]) / 1000 //interval when valve is open
 
+    var time = null;
+    if(input.bytes.length >= 18){
+        time = (input.bytes[14] * 16777216 +
+                input.bytes[15] * 65536 +
+                input.bytes[16] * 256 +
+                input.bytes[17]);
+    }
+
+    /*
+    The last bit (the 18 bytes for firmware with a timestamp, and the 14 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+
     var decoded = 
     {
-        NUM:num
-        BAT:bat        
-        VALVE:valve
-        //FLOW_PULSE_1S_DIFF:flow_pulse_1s_diff
-        FLOW_VELOCITY:flow_velocity
-        FLOW_RATE:flow_rate
-        VALVE_ON_ALL_TIME:Valve_on_all_time
-        INTERVAL:interval
+        NUM:num,
+        BAT:bat,        
+        VALVE:valve,
+        //FLOW_PULSE_1S_DIFF:flow_pulse_1s_diff,
+        FLOW_VELOCITY:flow_velocity,
+        FLOW_RATE:flow_rate,
+        VALVE_ON_ALL_TIME:Valve_on_all_time,
+        INTERVAL:interval,
     };
 
     // Test for LoRa properties in normalizedPayload
- try {
+    try {
 
-  if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
-    decoded.LORA_RSSI = normalizedPayload.gateways[0].rssi || 0;
-    decoded.LORA_SNR = normalizedPayload.gateways[0].snr || 0;
-  } else {
+    if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
+        decoded.LORA_RSSI = normalizedPayload.gateways[0].rssi || 0;
+        decoded.LORA_SNR = normalizedPayload.gateways[0].snr || 0;
+    } else {
+        decoded.LORA_RSSI = 0;
+        decoded.LORA_SNR = 0;
+    }
+
+    decoded.LORA_DATARATE = normalizedPayload.spreading_factor 
+                        || normalizedPayload.data_rate 
+                        || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
+                        || "unknown";
+    
+    } catch (error) {
+    console.log('LoRa property parsing error:', error);
     decoded.LORA_RSSI = 0;
     decoded.LORA_SNR = 0;
-  }
+    decoded.LORA_DATARATE = "unknown";
+    }
 
-  decoded.LORA_DATARATE = normalizedPayload.spreading_factor 
-                       || normalizedPayload.data_rate 
-                       || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
-                       || "unknown";
-  
-} catch (error) {
-  console.log('LoRa property parsing error:', error);
-  decoded.LORA_RSSI = 0;
-  decoded.LORA_SNR = 0;
-  decoded.LORA_DATARATE = "unknown";
-}
-
-return decoded;
+    if(time !== null){
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "valve", value: decoded.valve, timestamp: time },
+            { field: "flow_velocity", value: decoded.flow_velocity, timestamp: time },
+            { field: "flow_rate", value: decoded.flow_rate, timestamp: time },
+            { field: "Valve_on_all_time", value: decoded.Valve_on_all_time, timestamp: time },
+            { field: "interval", value: decoded.interval, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
+    else{
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "valve", value: decoded.valve },
+            { field: "flow_velocity", value: decoded.flow_velocity },
+            { field: "flow_rate", value: decoded.flow_rate },
+            { field: "Valve_on_all_time", value: decoded.Valve_on_all_time },
+            { field: "interval", value: decoded.interval },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
 }
 
 // .................................................................................................

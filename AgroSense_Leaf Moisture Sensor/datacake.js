@@ -19,6 +19,17 @@ function Decoder(payload, port) {
     temp = temp / 10.0
     var interval = (input.bytes[8] * 16777216 + input.bytes[9] * 65536 + input.bytes[10] * 256 + input.bytes[11]) / 1000
 
+    // No timestamp by default
+    var time = null;
+
+    // Check if there is a timestamp
+    if (input.bytes.length >= 16) {
+        time = (input.bytes[12] * 16777216 +
+                input.bytes[13] * 65536 +
+                input.bytes[14] * 256 +
+                input.bytes[15]);
+    }
+
     var decoded = {
         bat: bat,
         Significant: Significant,
@@ -41,17 +52,28 @@ function Decoder(payload, port) {
     }
 
     if (Significant) {
-        return [
-            { field: "bat", value: decoded.bat },
-            { field: "humi", value: decoded.humi },
-            { field: "temp", value: decoded.temp },
-            { field: "interval", value: decoded.interval },
-            { field: "lora_rssi", value: decoded.lora_rssi },
-            { field: "lora_snr", value: decoded.lora_snr },
-            { field: "lora_datarate", value: decoded.lora_datarate }
-        ];
+        if (time != null) {
+            return [
+                { field: "bat", value: decoded.bat, timestamp: time },
+                { field: "humi", value: decoded.humi, timestamp: time },
+                { field: "temp", value: decoded.temp, timestamp: time },
+                { field: "interval", value: decoded.interval, timestamp: time },
+                { field: "lora_rssi", value: decoded.lora_rssi },
+                { field: "lora_snr", value: decoded.lora_snr },
+                { field: "lora_datarate", value: decoded.lora_datarate }
+            ];
+        } else {
+            return [
+                { field: "bat", value: decoded.bat },
+                { field: "humi", value: decoded.humi },
+                { field: "temp", value: decoded.temp },
+                { field: "interval", value: decoded.interval },
+                { field: "lora_rssi", value: decoded.lora_rssi },
+                { field: "lora_snr", value: decoded.lora_snr },
+                { field: "lora_datarate", value: decoded.lora_datarate }
+            ];
+        }
     }
-
     else {
         return [
             { field: "Significant", value: "data invalid" },

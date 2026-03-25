@@ -14,18 +14,28 @@ function Decoder(payload, port) {
     var CT1_ADC = ( input.bytes[6] * 256 +  input.bytes[7]) / 1000.0   //This voltage needs to be combined with the sensor's ratio
     var CT2_ADC = ( input.bytes[8] * 256 +  input.bytes[9]) / 1000.0   //This voltage needs to be combined with the sensor's ratio
   
-  var CT1 = CT1_ADC*100 //if the sensor is 60A/1V, multiply by 60; if it's 100A/1V, multiply by 100; if it's 300A/1V, multiply by 300.
-  var CT2 = CT2_ADC*100 //if the sensor is 60A/1V, multiply by 60; if it's 100A/1V, multiply by 100; if it's 300A/1V, multiply by 300.
+    var CT1 = CT1_ADC*100 //if the sensor is 60A/1V, multiply by 60; if it's 100A/1V, multiply by 100; if it's 300A/1V, multiply by 300.
+    var CT2 = CT2_ADC*100 //if the sensor is 60A/1V, multiply by 60; if it's 100A/1V, multiply by 100; if it's 300A/1V, multiply by 300.
 
-  var humidity = ( input.bytes[10] * 256 +  input.bytes[11]) / 10.0;
-  var temperature =  input.bytes[12] * 256 + input.bytes[13];
-  if (temperature >= 0x8000) {
-    temperature -= 0x10000;
-  }
-  temperature = temperature / 10.0;
-    
+    var humidity = ( input.bytes[10] * 256 +  input.bytes[11]) / 10.0;
+    var temperature =  input.bytes[12] * 256 + input.bytes[13];
+    if (temperature >= 0x8000) {
+      temperature -= 0x10000;
+    }
+    temperature = temperature / 10.0;
     
     var interval = (input.bytes[14]* 16777216 + input.bytes[15]* 65536 + input.bytes[16] * 256 + input.bytes[17]) / 1000
+
+    // No timestamp by default
+    var time = null;
+
+    // Check if there is a timestamp
+    if (input.bytes.length >= 22) {
+        time = (input.bytes[18] * 16777216 +
+                input.bytes[19] * 65536 +
+                input.bytes[20] * 256 +
+                input.bytes[21]);
+    }
 
     var decoded = 
     {
@@ -33,46 +43,68 @@ function Decoder(payload, port) {
         ADC_2:ADC_2,
         CT1:CT1,
         CT2:CT2,
-	    temperature:temperature,
-	    humidity:humidity,
-	    interval:interval,
+        temperature:temperature,
+        humidity:humidity,
+        interval:interval,
     };
 
+    /*
+    Note:
+    The last bit (the 22 bytes for firmware with a timestamp, and the 18 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+
     // Test for LoRa properties in normalizedPayload
- try {
+    try {
+      if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
+        decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
+        decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
+      } else {
+        decoded.lora_rssi = 0;
+        decoded.lora_snr = 0;
+      }
 
-  if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
-    decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
-    decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
-  } else {
-    decoded.lora_rssi = 0;
-    decoded.lora_snr = 0;
-  }
 
+    decoded.lora_datarate = normalizedPayload.spreading_factor 
+                        || normalizedPayload.data_rate 
+                        || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
+                        || "unknown";
+    
+    } catch (error) {
+      console.log('LoRa property parsing error:', error);
+      decoded.lora_rssi = 0;
+      decoded.lora_snr = 0;
+      decoded.lora_datarate = "unknown";
+    }
 
-  decoded.lora_datarate = normalizedPayload.spreading_factor 
-                       || normalizedPayload.data_rate 
-                       || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
-                       || "unknown";
-  
-} catch (error) {
-  console.log('LoRa property parsing error:', error);
-  decoded.lora_rssi = 0;
-  decoded.lora_snr = 0;
-  decoded.lora_datarate = "unknown";
-}
-
-return [
-  { field: "ADC_1", value: decoded.ADC_1 },
-  { field: "ADC_2", value: decoded.ADC_2 },
-  { field: "CT1", value: decoded.CT1 },
-  { field: "CT2", value: decoded.CT2 },
-  { field: "humidity", value: decoded.humidity },
-  { field: "temperature", value: decoded.temperature },
-  { field: "interval", value: decoded.interval },
-  { field: "lora_rssi", value: decoded.lora_rssi },
-  { field: "lora_snr", value: decoded.lora_snr },
-  { field: "lora_datarate", value: decoded.lora_datarate },
-];
+    if (time !== null) {
+        return [
+          { field: "ADC_1", value: decoded.ADC_1, timestamp: time },
+          { field: "ADC_2", value: decoded.ADC_2, timestamp: time },
+          { field: "CT1", value: decoded.CT1, timestamp: time },
+          { field: "CT2", value: decoded.CT2, timestamp: time },
+          { field: "humidity", value: decoded.humidity, timestamp: time },
+          { field: "temperature", value: decoded.temperature, timestamp: time },
+          { field: "interval", value: decoded.interval, timestamp: time },
+          { field: "lora_rssi", value: decoded.lora_rssi },
+          { field: "lora_snr", value: decoded.lora_snr },
+          { field: "lora_datarate", value: decoded.lora_datarate },
+      ];
+    }
+    else{
+        return [
+          { field: "ADC_1", value: decoded.ADC_1 },
+          { field: "ADC_2", value: decoded.ADC_2 },
+          { field: "CT1", value: decoded.CT1 },
+          { field: "CT2", value: decoded.CT2 },
+          { field: "humidity", value: decoded.humidity },
+          { field: "temperature", value: decoded.temperature },
+          { field: "interval", value: decoded.interval },
+          { field: "lora_rssi", value: decoded.lora_rssi },
+          { field: "lora_snr", value: decoded.lora_snr },
+          { field: "lora_datarate", value: decoded.lora_datarate },
+      ];
+    }
+    
 }
 

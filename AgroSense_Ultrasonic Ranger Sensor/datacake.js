@@ -12,6 +12,22 @@ function Decoder(payload, port) {
     var range = (input.bytes[3] * 256 + input.bytes[4]) 
     var interval = (input.bytes[5] * 16777216 + input.bytes[6] * 65536 + input.bytes[7] * 256 + input.bytes[8]) / 1000
   
+    var time = null;
+
+    if(input.bytes.length >= 13){
+        time = (input.bytes[9] * 16777216 +
+                input.bytes[10] * 65536 +
+                input.bytes[11] * 256 +
+                input.bytes[12]);
+    }
+
+    /*
+    Note:
+    The last bit (the 13 bytes for firmware with a timestamp, and the 9 bytes for firmware without a timestamp)
+    is the system local data upload flag; when received by the platform, it is always set to 0 (and can be ignored).
+    */
+
+
     var decoded = 
     {
       bat:bat,
@@ -20,37 +36,49 @@ function Decoder(payload, port) {
     };
 
     // Test for LoRa properties in normalizedPayload
- try {
+  try {
 
-  if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
-    decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
-    decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
-  } else {
-    decoded.lora_rssi = 0;
-    decoded.lora_snr = 0;
-  }
+    if (normalizedPayload.gateways && normalizedPayload.gateways.length > 0) {
+      decoded.lora_rssi = normalizedPayload.gateways[0].rssi || 0;
+      decoded.lora_snr = normalizedPayload.gateways[0].snr || 0;
+    } else {
+      decoded.lora_rssi = 0;
+      decoded.lora_snr = 0;
+    }
 
 
-  decoded.lora_datarate = normalizedPayload.spreading_factor 
-                       || normalizedPayload.data_rate 
-                       || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
-                       || "unknown";
-  
-} catch (error) {
-  console.log('LoRa property parsing error:', error);
-  decoded.lora_rssi = 0;
-  decoded.lora_snr = 0;
-  decoded.lora_datarate = "unknown";
-}
+    decoded.lora_datarate = normalizedPayload.spreading_factor 
+                        || normalizedPayload.data_rate 
+                        || (normalizedPayload.networks && normalizedPayload.networks.lora && normalizedPayload.networks.lora.dr)
+                        || "unknown";
+    
+    } catch (error) {
+      console.log('LoRa property parsing error:', error);
+      decoded.lora_rssi = 0;
+      decoded.lora_snr = 0;
+      decoded.lora_datarate = "unknown";
+    }
 
-return [
-  { field: "bat", value: decoded.bat },
-  { field: "range", value: decoded.range },
-  { field: "interval", value: decoded.interval },
-  { field: "lora_rssi", value: decoded.lora_rssi },
-  { field: "lora_snr", value: decoded.lora_snr },
-  { field: "lora_datarate", value: decoded.lora_datarate },
-];
+    if(time !== null){
+        return [
+            { field: "bat", value: decoded.bat, timestamp: time },
+            { field: "range", value: decoded.range, timestamp: time },
+            { field: "interval", value: decoded.interval, timestamp: time },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
+    else{
+        return [
+            { field: "bat", value: decoded.bat },
+            { field: "range", value: decoded.range },
+            { field: "interval", value: decoded.interval },
+            { field: "lora_rssi", value: decoded.lora_rssi },
+            { field: "lora_snr", value: decoded.lora_snr },
+            { field: "lora_datarate", value: decoded.lora_datarate }
+        ];
+    }
 }
 
 
