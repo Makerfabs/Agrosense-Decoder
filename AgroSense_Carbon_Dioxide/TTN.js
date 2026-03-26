@@ -82,3 +82,28 @@ function Encoder(input) {
 
     return payload;
 }
+
+// fPort 3   Adjust CO2 Preheating Time (1-5mins)
+// Encoder function for port 3
+function Encoder(input) {
+    var minutes = input.minutes;
+
+    // Converting minutes to seconds
+    var seconds = minutes * 60;
+
+    // limit range 1–5 minutes
+    if (seconds < 60) {
+        seconds = 60;
+    }
+
+    if (seconds > 300) {
+        seconds = 300;
+    }
+
+    var payload = [
+        (seconds >> 8) & 0xFF,
+        seconds & 0xFF
+    ];
+
+    return payload;
+}
