@@ -1,7 +1,6 @@
 // This file contains the uplink and downlink for datacake
 
 // Uplink
-
 function Decoder(payload, port) {
     var input = {
         bytes: payload
@@ -11,19 +10,32 @@ function Decoder(payload, port) {
     var batteryLevel = input.bytes[2] / 10.0;
     var gSensorState = input.bytes[3];
     var gpsStatus = input.bytes[4];
-    var gsensor_onoff = input.bytes[15];
-    var gsensor_sensitivity = input.bytes[16];
+    var gsensor_onoff = input.bytes[22];
+    var gsensor_sensitivity = input.bytes[23];
 
-    var latitude, nsHemi, longitude, ewHemi, device_location;
+    var year, month, date, hour, minute, second, latitude, nsHemi, longitude, ewHemi, device_location;
 
     if (gpsStatus != 0) {
+        year = input.bytes[5] * 256 + input.bytes[6];
+        month = input.bytes[7];
+        date = input.bytes[8];
+        hour = input.bytes[9];
+        minute = input.bytes[10];
+        second = input.bytes[11];
 
-        latitude = (input.bytes[5] * 16777216 + input.bytes[6] * 65536 + input.bytes[7] * 256 + input.bytes[8]) / 100000;
+        latitude = (input.bytes[12] * 16777216 + input.bytes[13] * 65536 + input.bytes[14] * 256 + input.bytes[15]) / 100000;
         nsHemi = input.bytes[16] === 0 ? 'N' : 'S';
 
-        longitude = (input.bytes[10] * 16777216 + input.bytes[11] * 65536 + input.bytes[12] * 256 + input.bytes[13]) / 100000;
+        longitude = (input.bytes[17] * 16777216 + input.bytes[18] * 65536 + input.bytes[19] * 256 + input.bytes[20]) / 100000;
         ewHemi = input.bytes[21] === 0 ? 'E' : 'W';
     } else {
+        year = 0;
+        month = 0;
+        date = 0;
+        hour = 0;
+        minute = 0;
+        second = 0;
+
         latitude = 0;
         nsHemi = 'N';
 
@@ -63,18 +75,19 @@ function Decoder(payload, port) {
     }
 
     return [
-        { field: "batteryLevel", value: decoded.batteryLevel },
-        { field: "gSensorState", value: decoded.gSensorState },
-        { field: "latitude", value: decoded.latitude },
-        { field: "longitude", value: decoded.longitude },
-        { field: "device_location", value: decoded.device_location },
-        { field: "gsensor_onoff", value: decoded.gsensor_onoff },
-        { field: "gsensor_sensitivity", value: decoded.gsensor_sensitivity },
-        { field: "lora_rssi", value: decoded.lora_rssi },
-        { field: "lora_snr", value: decoded.lora_snr },
-        { field: "lora_datarate", value: decoded.lora_datarate }
+        { field: "BATTERY", value: decoded.batteryLevel },
+        { field: "SENSOR_STATE", value: decoded.gSensorState },
+        //{ field: "latitude", value: decoded.latitude },
+        //{ field: "longitude", value: decoded.longitude },
+        { field: "LOCATION", value: decoded.device_location },
+        { field: "SENSOR_ON_OFF", value: decoded.gsensor_onoff },
+        { field: "SENSITIVITY", value: decoded.gsensor_sensitivity },
+        { field: "LORA_RSSI", value: decoded.lora_rssi },
+        { field: "LORA_SNR", value: decoded.lora_snr },
+        { field: "LORA_DATARATE", value: decoded.lora_datarate }
     ];
 }
+
 
 
 // .................................................................................................
