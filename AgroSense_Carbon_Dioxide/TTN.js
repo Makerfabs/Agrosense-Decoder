@@ -9,18 +9,18 @@ function decodeUplink(input) {
     var co2 = input.bytes[3] * 256 + input.bytes[4]
     
     var interval = (
-        input.bytes[5] * 16777216 +
-        input.bytes[6] * 65536 +
-        input.bytes[7] * 256 +
-        input.bytes[8]
+        input.bytes[7] * 16777216 +
+        input.bytes[8] * 65536 +
+        input.bytes[9] * 256 +
+        input.bytes[10]
       ) / 1000;
 
     var time = null;
     var timeStr = null;
 
-    if (input.bytes.length >= 13) {
+    if (input.bytes.length >= 15) {
 
-        time = (input.bytes[9]*16777216 + input.bytes[10]*65536 + input.bytes[11]*256 + input.bytes[12]);
+        time = (input.bytes[11]*16777216 + input.bytes[12]*65536 + input.bytes[13]*256 + input.bytes[14]);
 
         var d = new Date(time * 1000);
         
