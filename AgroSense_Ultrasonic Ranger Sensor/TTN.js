@@ -12,7 +12,7 @@ function decodeUplink(input) {
   var timeStr = null;
 
   if (input.bytes.length >= 13) {
-    time = (input.bytes[9]* 16777216 + input.bytes[10]* 65536 + input.bytes[11] * 256 + input.bytes[12]); //interval when valve is open
+    time = (input.bytes[9]* 16777216 + input.bytes[10]* 65536 + input.bytes[11] * 256 + input.bytes[12]);
 
     var d = new Date(time * 1000);
 
