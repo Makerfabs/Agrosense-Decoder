@@ -47,12 +47,12 @@ function Decoder(payload, port) {
     }
 
     return [
-        { field: "BAT", value: decoded.bat, timestamp: time },
-        { field: "DOOR_OPEN_FLAG", value: decoded.Door_open_flag, timestamp: time },
-        { field: "DOOR_OPEN_CNT", value: decoded.Door_open_cnt, timestamp: time },
-        { field: "DOOR_OPEN_LAST_TIME", value: decoded.Door_open_last_time, timestamp: time },
-        { field: "DOOR_OPEN_ALL_TIME", value: decoded.Door_open_all_time, timestamp: time },
-        { field: "INTERVAL", value: decoded.interval, timestamp: time },
+        { field: "BAT", value: decoded.BAT, timestamp: time },
+        { field: "DOOR_OPEN_FLAG", value: decoded.DOOR_OPEN_FLAG, timestamp: time },
+        { field: "DOOR_OPEN_CNT", value: decoded.DOOR_OPEN_CNT, timestamp: time },
+        { field: "DOOR_OPEN_LAST_TIME", value: decoded.DOOR_OPEN_LAST_TIME, timestamp: time },
+        { field: "DOOR_OPEN_ALL_TIME", value: decoded.DOOR_OPEN_ALL_TIME, timestamp: time },
+        { field: "INTERVAL", value: decoded.INTERVAL, timestamp: time },
         { field: "LORA_RSSI", value: decoded.LORA_RSSI, timestamp: time },
         { field: "LORA_SNR", value: decoded.LORA_SNR, timestamp: time },
         { field: "LORA_DATARATE", value: decoded.LORA_DATARATE, timestamp: time }
