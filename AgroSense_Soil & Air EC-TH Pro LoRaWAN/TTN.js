@@ -19,6 +19,11 @@ function decodeUplink(input) {
     // Since water quality varies from place to place, customers need to modify these values themselves.
     var Soil_RH_Percentage=(1270-Soil_RH)*100/(1270-815) //%
 
+    if(Soil_RH_Percentage>100)
+    {
+        Soil_RH_Percentage=100;
+    }
+
     var Soil_EC = (input.bytes[7] * 16777216 + input.bytes[8] * 65536 + input.bytes[9] * 256 + input.bytes[10]) / 100.0 //µS/cm
     var Air_temp = (input.bytes[11] * 256 + input.bytes[12])
     
