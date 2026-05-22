@@ -93,28 +93,28 @@ function Decoder(payload, port) {
 
     if(time !== null){
         return [
-            { field: "BAT", value: decoded.bat, timestamp: time },
-            { field: "SOIL_TEMP", value: decoded.Soil_temp, timestamp: time },
-            { field: "SOIL_RH_PERCENTAGE", value: decoded.Soil_RH_Percentage, timestamp: time },
-            { field: "SOIL_EC", value: decoded.Soil_EC, timestamp: time },
-            { field: "AIR_TEMP", value: decoded.Air_temp, timestamp: time },
-            { field: "AIR_HUMI", value: decoded.Air_humi, timestamp: time },
-            { field: "LORA_RSSI", value: decoded.lora_rssi },
-            { field: "LORA_SNR", value: decoded.lora_snr },
-            { field: "LORA_DATARATE", value: decoded.lora_datarate }
+            { field: "BAT", value: decoded.BAT, timestamp: time },
+            { field: "SOIL_TEMP", value: decoded.SOIL_TEMP, timestamp: time },
+            { field: "SOIL_RH_PERCENTAGE", value: decoded.SOIL_RH_PERCENTAGE, timestamp: time },
+            { field: "SOIL_EC", value: decoded.SOIL_EC, timestamp: time },
+            { field: "AIR_TEMP", value: decoded.AIR_TEMP, timestamp: time },
+            { field: "AIR_HUMI", value: decoded.AIR_HUMI, timestamp: time },
+            { field: "LORA_RSSI", value: decoded.LORA_RSSI },
+            { field: "LORA_SNR", value: decoded.LORA_SNR },
+            { field: "LORA_DATARATE", value: decoded.LORA_DATARATE }
         ];
     }
     else{
         return [
-            { field: "BAT", value: decoded.bat },
-            { field: "SOIL_TEMP", value: decoded.Soil_temp },
-            { field: "SOIL_RH_PERCENTAGE", value: decoded.Soil_RH_Percentage },
-            { field: "SOIL_EC", value: decoded.Soil_EC },
-            { field: "AIR_TEMP", value: decoded.Air_temp },
-            { field: "AIR_HUMI", value: decoded.Air_humi },
-            { field: "LORA_RSSI", value: decoded.lora_rssi },
-            { field: "LORA_SNR", value: decoded.lora_snr },
-            { field: "LORA_DATARATE", value: decoded.lora_datarate }
+            { field: "BAT", value: decoded.BAT },
+            { field: "SOIL_TEMP", value: decoded.SOIL_TEMP },
+            { field: "SOIL_RH_PERCENTAGE", value: decoded.SOIL_RH_PERCENTAGE },
+            { field: "SOIL_EC", value: decoded.SOIL_EC },
+            { field: "AIR_TEMP", value: decoded.AIR_TEMP },
+            { field: "AIR_HUMI", value: decoded.AIR_HUMI },
+            { field: "LORA_RSSI", value: decoded.LORA_RSSI },
+            { field: "LORA_SNR", value: decoded.LORA_SNR },
+            { field: "LORA_DATARATE", value: decoded.LORA_DATARATE }
         ];
     }
 }
