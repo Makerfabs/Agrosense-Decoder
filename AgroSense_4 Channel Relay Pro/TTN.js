@@ -79,3 +79,29 @@ function Encoder(input) {
 
     return payload;
 }
+
+// Encoder function to be used in the TTN console for downlink payload
+// fPort 6   RELAY1   : 0-OFF; 1-ON
+// fPort 7   RELAY2   : 0-OFF; 1-ON
+// fPort 8   RELAY3   : 0-OFF; 1-ON
+// fPort 9   RELAY4   : 0-OFF; 1-ON
+
+function encodeDownlink(input) {
+  // Get the relay status from user input; the relay is identified by the fPort
+  var relayStatus = input.RELAY;  // User input: 0 or 1
+  var fPort = input.fPort;        // Get fPort (6, 7, 8, or 9)
+
+  // Ensure that relayStatus only accepts 0 or 1
+  relayStatus = relayStatus === 1 ? 1 : 0;
+
+  // Determine the relay state based on fPort
+  var payload = [relayStatus];
+
+  // Return the downlink message in the format required by TTN
+  return {
+    bytes: payload,  // Byte array to send
+    fPort: fPort,    // Dynamically set fPort
+    warnings: [],
+    errors: []
+  };
+}
