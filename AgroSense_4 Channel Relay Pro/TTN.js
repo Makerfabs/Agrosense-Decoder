@@ -12,14 +12,17 @@ function decodeUplink(input) {
         temperature -= 0x10000;
     }
     temperature = temperature / 100.0;
+
+    var pwr =  (bytes[8] * 256 + bytes[9])/100;
+
     var interval = (
-        bytes[8] * 16777216 +
-        bytes[9] * 65536 +
-        bytes[10] * 256 +
-        bytes[11]
+        bytes[10] * 16777216 +
+        bytes[11] * 65536 +
+        bytes[12] * 256 +
+        bytes[13]
     ) / 1000;
 
-    var time = (input.bytes[12]* 16777216 + input.bytes[13]* 65536 + input.bytes[14] * 256 + input.bytes[15]); //interval when valve is open
+    var time = (input.bytes[14]* 16777216 + input.bytes[15]* 65536 + input.bytes[16] * 256 + input.bytes[17]); //interval when valve is open
 
     var d = new Date(time * 1000);
 
@@ -40,68 +43,11 @@ function decodeUplink(input) {
             field4: Relay_4,//RELAY4   :0-OFF; 1-ON
             field5: temperature,
             field6: interval,
+            pwr: pwr,
             device_time: timeStr,//时间
             device_time_unix: time
         },
         warnings: [],
         errors: []
-  };
-}
-
-// .................................................................................................
-// .................................................................................................
-// .................................................................................................
-// Downlink.........................................................................................
-// .................................................................................................
-// .................................................................................................
-// .................................................................................................
-// Encoder function to be used in the TTN console for downlink payload
-
-// fPort 1   modification interval
-// Encoder function for port 1
-function Encoder(input) {
-    var minutes = input.minutes;
-
-    // Converting minutes to seconds
-    var seconds = minutes * 60;
-
-    // If the number of seconds is less than 300 seconds, set it to 300 seconds
-    if (seconds < 300) {
-        seconds = 300;
-    }
-
-    var payload = [
-        (seconds >> 24) & 0xFF,
-        (seconds >> 16) & 0xFF,
-        (seconds >> 8) & 0xFF,
-        seconds & 0xFF
-    ];
-
-    return payload;
-}
-
-// Encoder function to be used in the TTN console for downlink payload
-// fPort 6   RELAY1   : 0-OFF; 1-ON
-// fPort 7   RELAY2   : 0-OFF; 1-ON
-// fPort 8   RELAY3   : 0-OFF; 1-ON
-// fPort 9   RELAY4   : 0-OFF; 1-ON
-
-function encodeDownlink(input) {
-  // Get the relay status from user input; the relay is identified by the fPort
-  var relayStatus = input.RELAY;  // User input: 0 or 1
-  var fPort = input.fPort;        // Get fPort (6, 7, 8, or 9)
-
-  // Ensure that relayStatus only accepts 0 or 1
-  relayStatus = relayStatus === 1 ? 1 : 0;
-
-  // Determine the relay state based on fPort
-  var payload = [relayStatus];
-
-  // Return the downlink message in the format required by TTN
-  return {
-    bytes: payload,  // Byte array to send
-    fPort: fPort,    // Dynamically set fPort
-    warnings: [],
-    errors: []
   };
 }

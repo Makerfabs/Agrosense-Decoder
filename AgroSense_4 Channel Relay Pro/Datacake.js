@@ -14,14 +14,17 @@ function Decoder(payload, port) {
         temperature -= 0x10000;
     }
     temperature = temperature / 100.0;
+
+    var pwr =  (input.bytes[8] * 256 + input.bytes[9])/100;
+
     var interval = (
-        input.bytes[8] * 16777216 +
-        input.bytes[9] * 65536 +
-        input.bytes[10] * 256 +
-        input.bytes[11]
+        input.bytes[10] * 16777216 +
+        input.bytes[11] * 65536 +
+        input.bytes[12] * 256 +
+        input.bytes[13]
     ) / 1000;
 
-    var time = (input.bytes[12]* 16777216 + input.bytes[13]* 65536 + input.bytes[14] * 256 + input.bytes[15]); //interval when valve is open
+    var time = (input.bytes[14]* 16777216 + input.bytes[15]* 65536 + input.bytes[16] * 256 + input.bytes[17]); //interval when valve is open
 
     var decoded = 
     {
@@ -31,6 +34,7 @@ function Decoder(payload, port) {
         Relay_3:Relay_3,
         Relay_4:Relay_4,
         temperature:temperature,
+        pwr:pwr,
         interval:interval,
         time: time
     };
@@ -64,6 +68,7 @@ function Decoder(payload, port) {
         { field: "Relay_3", value: decoded.Relay_3, timestamp: time },
         { field: "Relay_4", value: decoded.Relay_4, timestamp: time },
         { field: "temperature", value: decoded.temperature, timestamp: time },
+        { field: "pwr", value: decoded.pwr, timestamp: time },
         { field: "INTERVAL", value: decoded.INTERVAL, timestamp: time },
         { field: "LORA_RSSI", value: decoded.LORA_RSSI, timestamp: time },
         { field: "LORA_SNR", value: decoded.LORA_SNR, timestamp: time },
